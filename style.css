@@ -1,0 +1,294 @@
+@charset "UTF-8";
+
+:root {
+    --c1: #acadff;
+    --c2: #aa7efc;
+    --c3: #340442;
+    --c4: #12381b;
+    --c5: #FFB323;
+    --c6: #7f5ac5;
+    
+    --fonte-padrao: 'Roboto', sans-serif;
+    --fonte-destaque: 'Varela Round', sans-serif;
+}
+
+* {
+    font-family: var(--fonte-padrao);
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+html, body {
+    background-color: var(--c1);
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+}
+
+#container {
+    width: 90vw;
+}
+            /*CONFIGURAÇÃO*/
+#formConfig{
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 85vw;
+    height: 50vh;
+    position: absolute;
+    z-index: 1;
+    background-color: var(--c2);
+    border: 3px solid var(--c3);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+
+#formConfig span {
+    margin-top: 3rem;
+    cursor: pointer;
+    width: 100%;
+    height: 2rem;
+    text-align: center;
+    color: var(--c3);
+}
+
+form {
+    width: 60%;
+    height: 20vh;
+}
+
+.formLabel {
+    position: absolute;
+    top: 0;
+    display: block;
+    transition: 0.2s;
+    font-size: 1.2rem;
+    color: var(--c3);
+}
+
+.blocoInput {
+    position: relative;
+    padding: 15px 0 0;
+    margin-top: 10px;
+    width: 100%;
+}
+
+#divRange {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.2rem;
+}
+
+.inputRange {
+    appearance: none;
+    background: transparent;
+    outline: none;
+    border: 2px solid var(--c3);
+    border-radius: 25px;
+    width: 90%;
+    height: 1rem;
+    padding: 7px 0;
+}
+
+.inputRange::-webkit-slider-thumb {
+    appearance: none;
+    width: 1.6rem;
+    height: 1.6rem;
+    background: var(--c3);
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+output{
+    color: var(--c3);
+    font-size: 1.3rem;
+    margin-left: 1rem;
+}
+
+.botao {
+    width: 100%;
+    border: none;
+    text-align: center;
+    background-color: var(--c3);
+    color: var(--c2);
+    padding: 1rem;
+    cursor: pointer;
+    border-radius: 1rem 0 1rem 1rem;
+}
+
+            /*GAMEOVER*/
+           
+#gameOver{
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 85vw;
+    height: 50vh;
+    position: absolute;
+    z-index: 1;
+    background-color: var(--c2);
+    border: 3px solid var(--c3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#itensGameOver {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+#itensGameOver > p {
+    margin-bottom: 1.5rem;
+    width: 100%;
+    text-align: center;
+    color: var(--c3);
+    font-size: 1.2rem;
+    font-weight: bolder;
+}
+
+#itensGameOver span {
+    cursor: pointer;
+    color: var(--c3);
+}
+
+            /*HEADER*/
+header{
+    user-select: none;
+    margin-top: 3rem;
+    height: 5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header img {
+    width: 5rem;
+}
+
+#titulo {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+#titulo p {
+    text-align: start;
+    font-family: var(--fonte-destaque);
+    color: var(--c3);
+    margin-left: 2rem;
+    font-size: 2rem;
+}
+
+header span {
+    cursor: pointer;
+    color: var(--c3);
+}
+
+            /*MAIN*/
+main {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    /* position: relative; */
+}
+
+table {
+    /* top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%); */
+    margin-top: 5rem;
+    position: absolute;
+    border: 2px solid var(--c3);
+    border-collapse: collapse;
+}
+
+table td {
+    width: 1.8rem;
+    height: 1.8rem;
+}
+
+table tr:nth-child(2n) td:nth-child(2n),
+table tr:nth-child(2n+1) td:nth-child(2n+1) {
+    background-color: var(--c2);
+}
+
+table tr:nth-child(2n+1) td:nth-child(2n),
+table tr:nth-child(2n) td:nth-child(2n+1) {
+    background-color: var(--c6);
+}
+
+#controleBotoes {
+    margin-top: 5rem;
+    bottom: 25%;
+    width: 18rem;
+    height: 12rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: absolute;
+}
+
+#botoesCima {
+    width: 100%;
+    height: 6rem;
+    display: flex;
+    justify-content: center;
+    
+}
+
+#botoesBaixo {
+    width: 100%;
+    height: 6rem;
+    display: flex;
+    justify-content: center;
+}
+
+.tecla {
+    cursor: pointer;
+    width: 6rem;
+    height: 6rem;
+    background-color: var(--c3);
+}
+
+@media (min-width: 450px) {
+    #formConfig {
+        width: 375px;
+    }
+    #gameOver {
+        width: 375px;
+    }
+}
+
+@media (min-width: 600px) {
+    table td {
+        width: 2rem;
+        height: 2rem;
+    }
+}
+
+@media (min-width: 800px) {
+    table td {
+        width: 2.2rem;
+        height: 2.2rem;
+    }
+}
+
+@media (min-width: 1000px) {
+    #container {
+        width: 900px;
+    }
+}
