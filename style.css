@@ -26,20 +26,30 @@ html {
 }
 
 html, body {
+    overflow: hidden;
     background-color: var(--c1);
     height: 100vh;
+    width: 100vw;
     display: flex;
     justify-content: center;
 }
 
 #container {
+    position: relative;
     display: flex;
     flex-direction: column;
-    width: 90vw;
+    width: 90%;
     height: 100%;
 }
 
 header {
+    box-shadow: 0 2px 12px rgb(202, 202, 202);
+    position: absolute;
+    background-color:#f0eeee;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 900;
     padding: 10px 0;
     display: flex;
     justify-content: space-between;
@@ -47,6 +57,7 @@ header {
 }
 
 #titulo {
+    margin-left: 15px;
     display: flex;
     align-items: center;
     column-gap: 10px;
@@ -60,15 +71,36 @@ header {
     font-size: 2rem;
 }
 
-main {
-    width: 100%;
+#settings > span {
+    margin-right: 15px;
+}
+
+#settings {
     display: flex;
+    align-items: center;
+    column-gap: 15px;
+}
+
+#settings p{
+    font-size: 1.3rem;
+}
+
+#contador{
+    font-size: 1.5rem;
+    margin-left: 5px;
+}
+
+main {
+    position: relative;
+    width: 100%;
     flex: 1;
+    display: flex;
     justify-content: center;
     align-items: center;
 }
 
 table {
+    left: -17.5px;
     border-collapse: separate;
 }
 
@@ -82,13 +114,13 @@ tr {
     position: relative;
     top: 0px;
     left: 0px;
-    transition: transform 0.3s linear z-index 0.3 linear;
+    /*transition: transform 0.3s linear z-index 0.3 linear;*/
     z-index: 0;
 }
 
 .dragging {
-    transform: scale(1.1);
-    z-index: 999;
+    /*transform: scale(1.1);*/
+    z-index: 10;
 }
 
 tr:nth-child(2n) {
@@ -102,31 +134,65 @@ td {
     height: 70px;
     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
     background-color: #f0eeee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-td div p {
-    text-align: center;
-    font-size: 1.2rem;
+td img {
+    width: 45px;
 }
 
 .player1 {
-    background-color: #FFB323;
+    background-color: #f5b132;
+}
+
+.player1-select{
+    background-color: #c78100;
+}
+
+.player1:hover {
+    background-color: #c78100;
+    transition: 500ms;
 }
 
 .player2{
-    background-color: #340442;
+    background-color: #915ea0;
+}
+
+.player2-select{
+    background-color: #992fb9;
+}
+
+.player2:hover{
+    background-color: #992fb9;
+    transition: 500ms;
 }
 
 .undefined {
     background-color: #cdcdcd;
 }
 
+.opcao {
+    background-color: #a8a8a8;
+    transition: 1s;
+}
+
+.opcao:hover {
+    background-color: #5c5c5c;
+}
+
 footer {
+    box-shadow: 0 -2px 12px rgb(202, 202, 202);
+    position: absolute;
+    z-index: 15;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color:#f0eeee;
     display: flex;
-    background-color:aquamarine;
     align-items: center;
     justify-content: center;
-    bottom: 0;
     height: 75px;
 }
 
@@ -143,4 +209,8 @@ li {
     width: 50px;
     height: 50px;
     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+li img {
+    width: 32px;
 }
