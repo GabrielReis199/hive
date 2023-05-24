@@ -1,4 +1,4 @@
-var totPecas = [1, 3, 3, 2, 2, 0, 0, 0];
+/*var totPecas = [1, 3, 3, 2, 2, 0, 0, 0];
 // 1 abelha; 3 formigas; 3 gafanhotos; 2 aranhas; 2 besouros; 1 mosquito; 1 joaninha; 1 tatu
 var imgPecas = {0: "Abelha",
                 1: "Formiga",
@@ -8,7 +8,7 @@ var imgPecas = {0: "Abelha",
                 5: "Mosquito",
                 6: "Joaninha",
                 7: "Tatu"};
-
+*/
 var vetPecas = [
     { nPecas: 1, nome: "Abelha",    img: "https://cdn-icons-png.flaticon.com/128/1123/1123332.png" },
     { nPecas: 3, nome: "Formiga",   img: "https://cdn-icons-png.flaticon.com/128/9861/9861504.png" },
@@ -26,81 +26,100 @@ var pecasPlayer2 = structuredClone(vetPecas);
 flagPlayer1 = true;
 contadorRodadas = 0;
 
-var geraVisinhos = function () {
+var geraVisinhos = function (tdAtual) {
     $("td").removeClass("undefined");
-    $("tbody td[class='player1'], tbody td[class='player2']").each(function () {
-        var tdAtual = $(this);
-        var dataTdAtualLinha = parseInt($(tdAtual).attr("data-linha"));
-        var dataTdAtualColuna = parseInt($(tdAtual).attr("data-coluna"));
+    $(tdAtual).find("img").removeAttr("data-aux");
+    var dataTdAtualLinha = parseInt($(tdAtual).attr("data-linha"));
+    var dataTdAtualColuna = parseInt($(tdAtual).attr("data-coluna"));
 
-        // INÍCIO PEÇAS ESQUERDA E DIREITA
-        if($(tdAtual).prev().length == 0) {
-            $(tdAtual).parent().prepend("<td data-linha='"+dataTdAtualLinha+"' data-coluna='"
-                +(dataTdAtualColuna-1)+"' class='undefined'></td>");
+    var auxiliar = $(tdAtual).prev().hasClass();
+    //console.log($(tdAtual).prev(), tdAtual, $(tdAtual).next() )
+
+    // INÍCIO PEÇAS ESQUERDA E DIREITA
+    if($(tdAtual).prev().length == 0) {
+        $(tdAtual).parent().prepend("<td data-linha='"+dataTdAtualLinha+"' data-coluna='"
+            +(dataTdAtualColuna-1)+"' class='undefined'></td>");
+        $("tr").not($(tdAtual).parent()).each(function () {
+            var linha =  $(this).find("td:first").attr("data-linha");
+            var coluna = $(this).find("td:first").attr("data-coluna");
+            $(this).prepend("<td data-linha='"+linha+"' data-coluna='"+(coluna-1)+"'></td>");
+        });
+    } else if(!$(tdAtual).prev().hasClass("player1") && !$(tdAtual).prev().hasClass("player2") ) {
+        $(tdAtual).prev().addClass("undefined");
+    }
+
+    if($(tdAtual).next().length == 0) {
+        $(tdAtual).parent().append("<td data-linha='"+dataTdAtualLinha+"' data-coluna='"
+            +(dataTdAtualColuna+1)+"' class='undefined'></td>");
+    } else if(!$(tdAtual).next().hasClass("player1") && !$(tdAtual).next().hasClass("player2") ) {
+        $(tdAtual).next().addClass("undefined");
+    }
+    // FIM PEÇAS ESQUERDA E DIREITA
+
+    // INÍCIO PEÇAS EM CIMA
+    if($(tdAtual).parent().prev().length == 0) {
+        var tamanhoTdAtual = $(tdAtual).parent().find("td").length;
+        var inicio = parseInt($(tdAtual).parent().find("td:first").attr("data-coluna"));
+
+        if(!auxiliar) {
             $("tr").not($(tdAtual).parent()).each(function () {
                 var linha =  $(this).find("td:first").attr("data-linha");
                 var coluna = $(this).find("td:first").attr("data-coluna");
                 $(this).prepend("<td data-linha='"+linha+"' data-coluna='"+(coluna-1)+"'></td>");
             });
-        } else if(!$(tdAtual).prev().hasClass("player1") && !$(tdAtual).prev().hasClass("player2") ) {
-            $(tdAtual).prev().addClass("undefined");
         }
 
-        if($(tdAtual).next().length == 0) {
-            $(tdAtual).parent().append("<td data-linha='"+dataTdAtualLinha+"' data-coluna='"
-                +(dataTdAtualColuna+1)+"' class='undefined'></td>");
-        } else if(!$(tdAtual).next().hasClass("player1") && !$(tdAtual).next().hasClass("player2") ) {
-            console.log(!$(tdAtual).next().hasClass("player1"), !$(tdAtual).next().hasClass("player2"), $(tdAtual).next(), $(tdAtual) )
-            $(tdAtual).next().addClass("undefined");
+        $(tdAtual).parent().parent().prepend("<tr data-id></tr>");
+        for(var i = 0; i < tamanhoTdAtual; i++) {
+            $("tr[data-id]")
+                .append("<td data-linha='"
+                    +(dataTdAtualLinha-1)+"' data-coluna='" +(dataTdAtualColuna+i-1)+ "' class='"
+                    +((inicio == dataTdAtualColuna || inicio == dataTdAtualColuna+1) ? "undefined" : "")+ "'></td>");
+            inicio++;
         }
-        // FIM PEÇAS ESQUERDA E DIREITA
 
-        // INÍCIO PEÇAS EM CIMA
-        if($(tdAtual).parent().prev().length == 0) {
-            var tamanhoTdAtual = $(tdAtual).parent().find("td").length;
-            var inicio = parseInt($(tdAtual).parent().find("td:first").attr("data-coluna"));
-
-            $(tdAtual).parent().parent().prepend("<tr data-id></tr>");
-            for(var i = 0; i < tamanhoTdAtual; i++) {
-                $("tr[data-id]")
-                    .append("<td data-linha='"
-                        +(dataTdAtualLinha-1)+"' data-coluna='" +(dataTdAtualColuna+i-1)+"' class='"
-                        +((inicio == dataTdAtualColuna || inicio == dataTdAtualColuna+1) ? "undefined" : "")+ "'></td>");
-                inicio++;
-            }
-            $("tr[data-id]").removeAttr("data-id");
-        } /*else if (
-            !$("td[data-linha='"+(dataTdAtualLinha-1)+"'][data-coluna='"+(dataTdAtualColuna)  +"']").hasClass("player1") &&
-            !$("td[data-linha='"+(dataTdAtualLinha-1)+"'][data-coluna='"+(dataTdAtualColuna+1)+"']").hasClass("player2")
-        ) {
-            //$(tdAtual).addClass("undefined");
-        }*/
-        // FIM PEÇAS EM CIMA
+        $("tr[data-id]").removeAttr("data-id");
+    } else if (
+        !$("td[data-linha='"+(dataTdAtualLinha-1)+"'][data-coluna='"+(dataTdAtualColuna)  +"']").hasClass("player1") &&
+        !$("td[data-linha='"+(dataTdAtualLinha-1)+"'][data-coluna='"+(dataTdAtualColuna+1)+"']").hasClass("player2")
+    ) {
+        if($("td[data-linha='"+(dataTdAtualLinha-1)+"'][data-coluna='"+(dataTdAtualColuna+1)+"']").length == 0) {
+            $("td[data-linha='"+(dataTdAtualLinha-1)+"'][data-coluna='"+(dataTdAtualColuna)+"']").parent()
+                .append("<td data-linha='"+(dataTdAtualLinha-1)+"' data-coluna='" +(dataTdAtualColuna+1)+"'></td>");
+        }
+        $("td[data-linha='"+(dataTdAtualLinha-1)+"'][data-coluna='"+(dataTdAtualColuna)  +"']").addClass("undefined");
+        $("td[data-linha='"+(dataTdAtualLinha-1)+"'][data-coluna='"+(dataTdAtualColuna+1)+"']").addClass("undefined");
+    }
+    // FIM PEÇAS EM CIMA
 /*
-        // INÍCIO PEÇAS EM BAIXO
-        if($(tdAtual).parent().next().length == 0) {
-            var tamanhoTdAtual = $(tdAtual).parent().find("td").length;
-            var inicio = parseInt($(tdAtual).parent().find("td:first").attr("data-coluna"));
+    // INÍCIO PEÇAS EM BAIXO
+    if($(tdAtual).parent().next().length == 0) {
+        var tamanhoTdAtual = $(tdAtual).parent().find("td").length;
+        var inicio = parseInt($(tdAtual).parent().find("td:first").attr("data-coluna"));
 
-            $(tdAtual).parent().parent().append("<tr data-id></tr>");
-            for(var i = 0; i < tamanhoTdAtual; i++) {
-                $("tr[data-id]")
-                    .append("<td data-linha='"
-                        +(dataTdAtualLinha+1)+"' data-coluna='" +(dataTdAtualColuna+i-1)+ "' class='"
-                        +((inicio == dataTdAtualColuna || inicio == dataTdAtualColuna+1) ? "undefined" : "")+ "'></td>");
-                inicio++;
-            }
-            $("tr[data-id]").removeAttr("data-id");
-        } else if (
-            !$("td[data-linha='"+(dataTdAtualLinha+1)+"'][data-coluna='"+(dataTdAtualColuna)  +"']").hasClass("player1") ||
-            !$("td[data-linha='"+(dataTdAtualLinha+1)+"'][data-coluna='"+(dataTdAtualColuna+1)+"']").hasClass("player2")
-        ) {
-            $(tdAtual).addClass("undefined");
+        $(tdAtual).parent().parent().append("<tr data-id></tr>");
+        for(var i = 0; i < tamanhoTdAtual; i++) {
+            $("tr[data-id]")
+                .append("<td data-linha='"
+                    +(dataTdAtualLinha+1)+"' data-coluna='" +(dataTdAtualColuna+i-1)+ "' class='"
+                    +((inicio == dataTdAtualColuna || inicio == dataTdAtualColuna+1) ? "undefined" : "")+ "'></td>");
+            inicio++;
         }
-        // FIM PEÇAS EM BAIXO
+        $("tr[data-id]").removeAttr("data-id");
+    } else if (
+        !$("td[data-linha='"+(dataTdAtualLinha+1)+"'][data-coluna='"+(dataTdAtualColuna)  +"']").hasClass("player1") &&
+        !$("td[data-linha='"+(dataTdAtualLinha+1)+"'][data-coluna='"+(dataTdAtualColuna+1)+"']").hasClass("player2")
+    ) {
+        if($("td[data-linha='"+(dataTdAtualLinha+1)+"'][data-coluna='"+(dataTdAtualColuna+1)+"']").length == 0) {
+            $("td[data-linha='"+(dataTdAtualLinha+1)+"'][data-coluna='"+(dataTdAtualColuna)+"']").parent()
+                .append("<td data-linha='"+(dataTdAtualLinha+1)+"' data-coluna='" +(dataTdAtualColuna+1)+"'></td>");
+        }
+        $("td[data-linha='"+(dataTdAtualLinha+1)+"'][data-coluna='"+(dataTdAtualColuna)  +"']").addClass("undefined");
+        $("td[data-linha='"+(dataTdAtualLinha+1)+"'][data-coluna='"+(dataTdAtualColuna+1)+"']").addClass("undefined");
+    }
+    // FIM PEÇAS EM BAIXO
 */
-        insereEspacosTr();
-    });
+    insereEspacosTr();
 };
 
 var insereEspacosTr = function () {
@@ -135,12 +154,13 @@ var getPecasDisponiveis = function () {
 
     $("li").click(function () {
         var img = $(this).find("img").attr("alt");
-        var infoImg = pecas.find(item => item.nome == img);
+        var infoImg = structuredClone(pecas.find(item => item.nome == img));
 
         if($("tbody tr").length == 0) {
             $("tbody").append("<tr><td data-linha='50' data-coluna='50' class='"+ textClasse +"'><img src='"+
-                infoImg.img +"' alt='"+ infoImg.nome +"'/></td></tr>");
-            geraVisinhos();
+                infoImg.img +"' alt='"+ infoImg.nome +"' data-aux/></td></tr>");
+            
+            geraVisinhos($("img[data-aux]").parent());
 
             for(var i=0; i<pecas.length; i++) {
                 if(pecas[i].nome == infoImg.nome) { 
@@ -160,9 +180,9 @@ var getPecasDisponiveis = function () {
             }
 
             $("td.opcao").click(function () {
+                console.log(infoImg);
                 $(this).removeClass().addClass(textClasse).append("<img src='"+infoImg.img +"' alt='"
-                    +infoImg.nome +"'/>");
-                $(this).removeClass("player2-select");
+                    +infoImg.nome +"' data-aux/>");
                 $("td").removeClass("undefined opcao");
 
                 for(var i=0; i<pecas.length; i++) {
@@ -171,7 +191,7 @@ var getPecasDisponiveis = function () {
                     }
                 }
                 
-                geraVisinhos();
+                geraVisinhos($("img[data-aux]").parent());
 
                 $("li").remove();
                 flagPlayer1 = !flagPlayer1;
@@ -182,6 +202,8 @@ var getPecasDisponiveis = function () {
         if(!flagPlayer1)
             $("#contador").text(++contadorRodadas);
     });
+
+    
 }
 
 getPecasDisponiveis();
