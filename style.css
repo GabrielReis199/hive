@@ -38,7 +38,7 @@ html, body {
     position: relative;
     display: flex;
     flex-direction: column;
-    width: 90%;
+    width: 100%;
     height: 100%;
 }
 
@@ -49,11 +49,39 @@ header {
     top: 0;
     left: 0;
     right: 0;
+    margin: auto;
     z-index: 900;
+    width: 500px;
     padding: 10px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.mostra-header {
+    width: 50px;
+    height: 30px;
+    box-shadow: 0 2px 12px rgb(202, 202, 202);
+    background-color:#f0eeee;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    z-index: 900;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mostra-header img {
+    width: 15px;
+}
+
+.mostra-header:hover {
+    transition: 800ms;
+    opacity: 1;
 }
 
 #titulo {
@@ -100,7 +128,8 @@ main {
 }
 
 table {
-    left: -17.5px;
+    position: relative;
+    /*left: -19.5px;*/
     border-collapse: separate;
 }
 
@@ -182,23 +211,58 @@ td img {
     background-color: #5c5c5c;
 }
 
-footer {
+#esquerda,
+#direita {
     box-shadow: 0 -2px 12px rgb(202, 202, 202);
-    position: absolute;
-    z-index: 15;
-    bottom: 0;
-    left: 0;
-    right: 0;
     background-color:#f0eeee;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 75px;
+    width: 75px;
+}
+
+#esquerda {
+    position: absolute;
+    z-index: 15;
+    height: 400px;
+    width: 120px;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    margin: auto;
+}
+
+#direita {
+    position: absolute;
+    z-index: 15;
+    height: 400px;
+    width: 120px;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+}
+
+#direita.vez-player1 {
+    box-shadow: 0 0 20px #c78100;
+}
+
+#esquerda.vez-player2 {
+    box-shadow: 0 0 20px #992fb9;
 }
 
 ul {
+    width: 100%;
+    height: 100%;
+    padding: 5px;
     display: flex;
-    column-gap: 2px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    row-gap: 5px;
+    column-gap: 5px;
     list-style: none;
 }
 
@@ -213,4 +277,38 @@ li {
 
 li img {
     width: 32px;
+}
+
+#controls {
+    box-shadow: 0 2px 12px rgb(202, 202, 202);
+    position: absolute;
+    background-color:#f0eeee;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    margin: auto;
+    z-index: 900;
+    width: 150px;
+    height: 30px;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    transition: 500ms;
+}
+
+#controls div img {
+    width: 15px;
+}
+
+#btnTop img {
+    transform: rotate(-90deg);
+}
+
+#btnBottom img {
+    transform: rotate(90deg);
+}
+
+#btnLeft img {
+    transform: rotate(180deg);
 }
