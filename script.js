@@ -17,6 +17,7 @@ contadorRodadas = 0;
 
 var pecaInsere = null;
 
+// Gera as coordenadas das peças em campo.
 var geraCoordenadas = function () {
     contadorAntes  = 50;
     contadorDepois = 50;
@@ -42,6 +43,7 @@ var geraCoordenadas = function () {
     });
 };
 
+// Diminui os espaços em cada linha para o tabuleiro ficar alinhado
 var insereEspacosTr = function () {
     var top = -15
     $("tr").each(function (index) {
@@ -52,11 +54,12 @@ var insereEspacosTr = function () {
     });
 }
 
+// Gera os vizinhos de cada peça inserida no tabuleiro
 var regulaTab = 1;
-
 var geraTabuleiro = function (left, top, right, bottom) {
     if($("tbody tr").length == 0) {
-        $("tbody").append("<tr data-linha='50'><td data-coluna='50' class='player1'>"+$(pecaInsere).html()+"</td></tr>");
+        $("tbody").append("<tr data-linha='50'><td class='player1' onclick='insPecTabu(this)' data-coluna='50'>"
+            +$(pecaInsere).html()+"</td></tr>");
     }
 
     if(left) {
@@ -90,7 +93,6 @@ var geraTabuleiro = function (left, top, right, bottom) {
         var vLeft = parseInt($("table").css("left"));
         var vTop = parseInt($("table").css("top"));
         var vMinus = $("tbody tr").length % 2 == regulaTab ? vLeft-37 : vLeft
-        //var somaVMais = 20+parseInt($("tbody tr").eq(8).nextAll().length)*20;
         var vMais = $("tbody tr").length < 10 ? (vTop-20) : (vTop-40);
         if($("tbody td[class=player1], tbody td[class=player2]").length > 1)
             $("table").css({"top": vMais+"px", "left": vMinus+"px"});
@@ -111,6 +113,67 @@ var geraTabuleiro = function (left, top, right, bottom) {
     insereEspacosTr();
 }
 
+// Marca as tds disponíveis no tabuleiro
+var mapeamentoEspacosDisponiveis = function () {
+    var classeOponente = !flagPlayer1 ? ".player1" : ".player2";
+    var classeAliado = flagPlayer1 ? ".player1" : ".player2";
+
+    if($("tbody tr").length == 0)
+        return;
+
+    $("td").removeClass("opcao");
+    if($("td[class='player1'], td[class='player2']").length == 1) {
+        $("tr[data-linha='49'] td[data-coluna='50'], tr[data-linha='49'] td[data-coluna='51'],"
+            +"tr[data-linha='50'] td[data-coluna='49'], tr[data-linha='50'] td[data-coluna='51'],"
+            +"tr[data-linha='51'] td[data-coluna='50'], tr[data-linha='51'] td[data-coluna='51']").addClass("opcao");
+        return;
+    }
+
+    $("tbody tr td").not("[class='player1'], [class='player2']").each(function () {
+        var col = parseInt($(this).attr("data-coluna"));
+        col = $(this).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+
+        if(
+            !$(this).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") &&
+            !$(this).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") &&
+            !$(this).prev().is(".player1, .player2") &&
+            !$(this).next().is(".player1, .player2") &&
+            !$(this).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") &&
+            !$(this).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2")
+        )
+            return;
+        
+        if(
+            $(this).parent().prev().find("[data-coluna='"+(col  )+"']").is(classeOponente) ||
+            $(this).parent().prev().find("[data-coluna='"+(col+1)+"']").is(classeOponente) ||
+            $(this).prev().is(classeOponente) ||
+            $(this).next().is(classeOponente) ||
+            $(this).parent().next().find("[data-coluna='"+(col  )+"']").is(classeOponente) ||
+            $(this).parent().next().find("[data-coluna='"+(col+1)+"']").is(classeOponente)
+        )
+            return;
+
+        var cont = 0;
+        if($(this).parent().prev().find("[data-coluna='"+(col  )+"']").is(classeAliado))
+            cont++;
+        if($(this).parent().prev().find("[data-coluna='"+(col+1)+"']").is(classeAliado))
+            cont++;
+        if($(this).prev().is(classeAliado))
+            cont++;
+        if($(this).next().is(classeAliado))
+            cont++;
+        if($(this).parent().next().find("[data-coluna='"+(col  )+"']").is(classeAliado))
+            cont++;
+        if($(this).parent().next().find("[data-coluna='"+(col+1)+"']").is(classeAliado))
+            cont++;
+        if(cont >= 5)
+            return;
+        
+        $(this).addClass("opcao");
+    });
+}
+
+// Atualiza as peças disponíveis para jogo a cada rodada passada
 var getPecasDisponiveis = function () {
     if(flagPlayer1)
         $("#contador").text(++contadorRodadas);
@@ -171,10 +234,11 @@ var getPecasDisponiveis = function () {
     ////////////////////////////////////////////////////////////
 
     pecas = flagPlayer1 ? pecasPlayer1 : pecasPlayer2;
-    textClasse = flagPlayer1 ? "player1" : "player2";
+    textClasseAliado = flagPlayer1 ? "player1" : "player2";
+    textClasseInimigo = !flagPlayer1 ? "player1" : "player2";
     divLado = flagPlayer1 ? "#direita" : "#esquerda";
 
-    $(divLado).toggleClass("vez-" + textClasse);
+    $(divLado).toggleClass("vez-" + textClasseAliado);
 
     $(divLado).prop("disabled", true).css('pointer-events', 'auto');
 
@@ -207,33 +271,40 @@ var getPecasDisponiveis = function () {
         }
     } else {
         $(divLado).hide();
+        $("#esquerda ul").append("<li></li>");
     }
 
     // Gera as peças disponíveis no ul atual
     if(contadorRodadas == 4 && pecas[0].nPecas == 1) {
-        $(divLado).find("ul").append("<li class='"+ textClasse +"'><img src='"+
+        $(divLado).find("ul").append("<li class='"+ textClasseAliado +"'><img src='"+
             pecas[0].img +"' alt='"+ pecas[0].nome +"'/></li>");
     } else {
         var aux = 0;
         while (aux < pecas.length) {
             if(pecas[aux].nPecas!=0)
                 for(var i = 1; i <= pecas[aux].nPecas; i++)
-                    $(divLado).find("ul").append("<li class='"+ textClasse +"'><img src='"
+                    $(divLado).find("ul").append("<li class='"+ textClasseAliado +"'><img src='"
                         +pecas[aux].img +"' alt='"+ pecas[aux].nome +"'/></li>");
             aux++;
         }
     }
 
     $("ul li").click(function () {
-        $("ul li").removeClass(textClasse + "-select");
-        $(this).addClass(textClasse + "-select");
+        $("ul li").removeClass(textClasseAliado + "-select");
+        $("td").removeClass(textClasseAliado + "-select")
+        $(this).addClass(textClasseAliado + "-select");
         $("main").css('pointer-events', 'auto');
         pecaInsere = $(this);
+        mapeamentoEspacosDisponiveis();
     });
+    $("ul li:first").trigger("click");
+    $("ul li").removeClass(textClasseAliado + "-select");
+    $("td").removeClass("opcao");
 }
 getPecasDisponiveis();
 $("#esquerda").removeClass("vez-player2");
 
+// Inicia o tabuleiro e chama as função para criar os visinhos das peças.
 var inserePecaTabuleiro = function (that) {
     $("main").css('pointer-events', 'none');
     if($("tbody tr").length == 0) {
@@ -263,8 +334,110 @@ var inserePecaTabuleiro = function (that) {
 }
 inserePecaTabuleiro();
 
+// Verifica se a peça selecionada quebra a colmeia
+var verificaQuebraColmeia = function (that) {
+    //true = quebra colmeia, false = não quebra
+    /*
+    $(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2")
+    $(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2")
+    $(that).prev().is(".player1, .player2")
+    $(that).next().is(".player1, .player2")
+    $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2")
+    $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2")
+    */
+
+    
+    var col = parseInt($(that).attr("data-coluna"));
+    col = $(that).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+
+    if(!$(that).next().is(".player1, .player2") && 
+       !$(that).parent().next().find("[data-coluna='"+(col)+"']").is(".player1, .player2") &&
+       $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") &&
+       ($(that).parent().prev().find("[data-coluna='"+(col )+"']").is(".player1, .player2") ||
+       $(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") ||
+       $(that).prev().is(".player1, .player2"))) {
+        return true;
+    }
+    
+    if(!$(that).prev().is(".player1, .player2") && 
+       !$(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") &&
+       $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") &&
+       ($(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
+       $(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") ||
+       $(that).next().is(".player1, .player2"))) {
+        return true;
+    }
+    
+    if(!$(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") && 
+        !$(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") &&
+        $(that).prev().is(".player1, .player2") &&
+        ($(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") ||
+        $(that).next().is(".player1, .player2") ||
+        $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2"))) {
+            return true;
+    }
+
+    if(!$(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") && 
+        !$(that).next().is(".player1, .player2") &&
+        $(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") &&
+        ($(that).next().is(".player1, .player2") ||
+        $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
+        $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2"))) {
+            return true;
+    }
+
+    if(!$(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") && 
+        !$(that).next().is(".player1, .player2") &&
+        $(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") &&
+        ($(that).prev().is(".player1, .player2") ||
+        $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
+        $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2"))) {
+            return true;
+    }
+
+    if(!$(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") && 
+        !$(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") &&
+        $(that).next().is(".player1, .player2") &&
+        ($(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
+        $(that).prev().is(".player1, .player2") ||
+        $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2"))) {
+            return true;
+    }
+    
+    if(!$(that).prev().is(".player1, .player2") && 
+        !$(that).next().is(".player1, .player2") &&
+        ($(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
+        $(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2")) &&
+        ($(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
+        $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2"))) {
+            return true;
+    }
+
+    if(!$(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") && 
+        !$(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") &&
+        ($(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
+        $(that).prev().is(".player1, .player2")) &&
+        ($(that).next().is(".player1, .player2") ||
+        $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2"))) {
+            return true;
+    }
+
+    if(!$(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") && 
+        !$(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") &&
+        ($(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") ||
+        $(that).next().is(".player1, .player2")) &&
+        ($(that).prev().is(".player1, .player2") ||
+        $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2"))) {
+            return true;
+    }
+
+    return false;
+};
+
+// Insere uma peça em um espaço vazio disponivel no tabuleiro
 var insPecTabu = function (that) {
-    if($(pecaInsere).length == 1 && !$(that).hasClass("player1") && !$(that).hasClass("player2")) {
+    var textClassAliado = flagPlayer1 ? "player1" : "player2";
+    if($(pecaInsere).length == 1 && $(that).hasClass("opcao")) {
         $(that).append($(pecaInsere).html()).attr("class", flagPlayer1 ? "player1" : "player2");
         $("li").remove();
         var pecas = flagPlayer1 ? pecasPlayer1 : pecasPlayer2;
@@ -272,11 +445,23 @@ var insPecTabu = function (that) {
             if(pecas[i].nome == $(pecaInsere).find("img").attr("alt"))
                 pecas[i].nPecas = pecas[i].nPecas - 1 ;
         flagPlayer1 = !flagPlayer1;
+        $("td").removeClass("opcao");
         inserePecaTabuleiro(that);
         getPecasDisponiveis();
+    } else if($(that).hasClass(textClassAliado)){
+        var textClassePeca = $(that).is(".player1") ? "player1" : "player2";
+        if(textClassAliado == textClassePeca) {
+            $("ul li").removeClass(textClassAliado + "-select");
+            $("td").removeClass("opcao");
+            $("td").removeClass(textClassePeca + "-select");
+            if(!verificaQuebraColmeia(that)) // true = quebra colmeia, false = não quebra
+                $(that).addClass(textClassePeca + "-select");
+            pecaInsere = null;
+        }
     }
 }
 
+// Header esconder e aparecer
 $("header").click(function () {
     $(this).slideUp();
     $(this).parent().prepend("<div class='mostra-header'>"
@@ -287,52 +472,41 @@ $("header").click(function () {
     })
 });
 
+// Movimentação do tabuleiro (left, top, right, bottom, fixed)
 var iniciaInterval;
-$("#btnTop").on("click", function () {
-    $("table").css("top", (parseInt($("table").css("top"))-20)+"px");
-}).on("mousedown", function(){
-    clearInterval(iniciaInterval);
-    iniciaInterval = setInterval(function () {
-        $("table").css("top", (parseInt($("table").css("top"))-20)+"px");
-    }, 200);
-}).on("mouseup", function () {
-    clearInterval(iniciaInterval);
-});
+var movimentacaoTabuleiro = function () {
+    $("#btnTop")
+        .on("click", () => $("table").css("top", (parseInt($("table").css("top"))-20)+"px"))
+        .on("mousedown", function () {
+            clearInterval(iniciaInterval);
+            iniciaInterval = setInterval(() => $("table").css("top", (parseInt($("table").css("top"))-20)+"px"), 200);})
+        .on("mouseup", () => clearInterval(iniciaInterval));
 
-$("#btnBottom").on("click", function () {
-    $("table").css("top", (parseInt($("table").css("top"))+20)+"px");
-}).on("mousedown", function(){
-    clearInterval(iniciaInterval);
-    iniciaInterval = setInterval(function () {
-        $("table").css("top", (parseInt($("table").css("top"))+20)+"px");
-    }, 200);
-}).on("mouseup", function () {
-    clearInterval(iniciaInterval);
-});
+    $("#btnBottom")
+        .on("click", () => $("table").css("top", (parseInt($("table").css("top"))+20)+"px"))
+        .on("mousedown", function () {
+            clearInterval(iniciaInterval);
+            iniciaInterval = setInterval(() => $("table").css("top", (parseInt($("table").css("top"))+20)+"px"), 200);})
+        .on("mouseup", () => clearInterval(iniciaInterval));
 
-$("#btnLeft").on("click", function () {
-    $("table").css("left", (parseInt($("table").css("left"))-20)+"px");
-}).on("mousedown", function(){
-    clearInterval(iniciaInterval);
-    iniciaInterval = setInterval(function () {
-        $("table").css("left", (parseInt($("table").css("left"))-20)+"px");
-    }, 200);
-}).on("mouseup", function () {
-    clearInterval(iniciaInterval);
-});
+    $("#btnLeft")
+        .on("click", () => $("table").css("left", (parseInt($("table").css("left"))-20)+"px"))
+        .on("mousedown", function () {
+            clearInterval(iniciaInterval);
+            iniciaInterval = setInterval(() => $("table").css("left", (parseInt($("table").css("left"))-20)+"px"), 200);})
+        .on("mouseup", () => clearInterval(iniciaInterval));
 
-$("#btnRight").on("click", function () {
-    $("table").css("left", (parseInt($("table").css("left"))+20)+"px");
-}).on("mousedown", function(){
-    clearInterval(iniciaInterval);
-    iniciaInterval = setInterval(function () {
-        $("table").css("left", (parseInt($("table").css("left"))+20)+"px");
-    }, 200);
-}).on("mouseup", function () {
-    clearInterval(iniciaInterval);
-});
+    $("#btnRight")
+        .on("click", () => $("table").css("left", (parseInt($("table").css("left"))+20)+"px"))
+        .on("mousedown", function(){
+            clearInterval(iniciaInterval);
+            iniciaInterval = setInterval(() => $("table").css("left", (parseInt($("table").css("left"))+20)+"px"), 200);})
+        .on("mouseup", () => clearInterval(iniciaInterval));
 
-$("#btnFixed").click(function () {
-    $("table").css({"top": "0px", "left": "-19.5px"});
-    clearInterval(iniciaInterval);
-});
+    $("#btnFixed").click(function () {
+        $("table").css({"top": "0px", "left": "-19.5px"});
+        clearInterval(iniciaInterval);
+    });
+};
+movimentacaoTabuleiro();
+
