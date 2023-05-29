@@ -304,7 +304,7 @@ var getPecasDisponiveis = function () {
 getPecasDisponiveis();
 $("#esquerda").removeClass("vez-player2");
 
-// Inicia o tabuleiro e chama as função para criar os visinhos das peças.
+// Inicia o tabuleiro e chama as funções para criar os visinhos das peças.
 var inserePecaTabuleiro = function (that) {
     $("main").css('pointer-events', 'none');
     if($("tbody tr").length == 0) {
@@ -345,105 +345,186 @@ var verificaQuebraColmeia = function (that) {
     $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2")
     $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2")
     */
+    var pecasColmeia = [
+        {   linha: parseInt($("td").not(".undefined").first().parent().attr("data-linha")), 
+            coluna: parseInt($("td").not(".undefined").first().attr("data-coluna")) }
+    ];
+    var objThat = {linha: parseInt($(that).parent().attr("data-linha")), coluna: parseInt($(that).attr("data-coluna"))};
 
-    
-    var col = parseInt($(that).attr("data-coluna"));
-    col = $(that).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+    for(var pecaColmeia of pecasColmeia) {
+        var peca = $("tr[data-linha='"+pecaColmeia.linha+"'] td[data-coluna='"+pecaColmeia.coluna+"']")
 
-    if(!$(that).next().is(".player1, .player2") && 
-       !$(that).parent().next().find("[data-coluna='"+(col)+"']").is(".player1, .player2") &&
-       $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") &&
-       ($(that).parent().prev().find("[data-coluna='"+(col )+"']").is(".player1, .player2") ||
-       $(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") ||
-       $(that).prev().is(".player1, .player2"))) {
-        return true;
-    }
-    
-    if(!$(that).prev().is(".player1, .player2") && 
-       !$(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") &&
-       $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") &&
-       ($(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
-       $(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") ||
-       $(that).next().is(".player1, .player2"))) {
-        return true;
-    }
-    
-    if(!$(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") && 
-        !$(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") &&
-        $(that).prev().is(".player1, .player2") &&
-        ($(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") ||
-        $(that).next().is(".player1, .player2") ||
-        $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2"))) {
-            return true;
-    }
+        var col = parseInt($(peca).attr("data-coluna"));
+        col = $(peca).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+        var cimaAnt = $(peca).parent().prev().find("[data-coluna='"+(col  )+"']"),
+            cimaDep = $(peca).parent().prev().find("[data-coluna='"+(col+1)+"']"),
+            ant = $(peca).prev(),
+            dep = $(peca).next(),
+            baixoAnt = $(peca).parent().next().find("[data-coluna='"+(col  )+"']"),
+            baixoDep = $(peca).parent().next().find("[data-coluna='"+(col+1)+"']");
 
-    if(!$(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") && 
-        !$(that).next().is(".player1, .player2") &&
-        $(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") &&
-        ($(that).next().is(".player1, .player2") ||
-        $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
-        $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2"))) {
-            return true;
-    }
+        var classeCimaAnt = $(cimaAnt).is(".player1, .player2"),
+            classeCimaDep = $(cimaDep).is(".player1, .player2"),
+            classeAnt = $(ant).is(".player1, .player2"),
+            classeDep = $(dep).is(".player1, .player2"),
+            classeBaixoAnt = $(baixoAnt).is(".player1, .player2"),
+            classeBaixoDep = $(baixoDep).is(".player1, .player2");
 
-    if(!$(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") && 
-        !$(that).next().is(".player1, .player2") &&
-        $(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") &&
-        ($(that).prev().is(".player1, .player2") ||
-        $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
-        $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2"))) {
-            return true;
-    }
+        var coordCimaAnt = {linha: parseInt($(cimaAnt).parent().attr("data-linha")), 
+                            coluna: parseInt($(cimaAnt).attr("data-coluna"))},
+            coordCimaDep = {linha: parseInt($(cimaDep).parent().attr("data-linha")), 
+                            coluna: parseInt($(cimaDep).attr("data-coluna"))},
+            coordAnt =  {linha: parseInt($(ant).parent().attr("data-linha")), 
+                        coluna: parseInt($(ant).attr("data-coluna"))},
+            coordDep = {linha: parseInt($(dep).parent().attr("data-linha")), 
+                        coluna: parseInt($(dep).attr("data-coluna"))},
+            coordBaixoAnt = {linha: parseInt($(baixoAnt).parent().attr("data-linha")), 
+                            coluna: parseInt($(baixoAnt).attr("data-coluna"))},
+            coordBaixoDep = {linha: parseInt($(baixoDep).parent().attr("data-linha")), 
+                            coluna: parseInt($(baixoDep).attr("data-coluna"))};
 
-    if(!$(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") && 
-        !$(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") &&
-        $(that).next().is(".player1, .player2") &&
-        ($(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
-        $(that).prev().is(".player1, .player2") ||
-        $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2"))) {
-            return true;
-    }
-    
-    if(!$(that).prev().is(".player1, .player2") && 
-        !$(that).next().is(".player1, .player2") &&
-        ($(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
-        $(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2")) &&
-        ($(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
-        $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2"))) {
-            return true;
+        if( classeCimaAnt && JSON.stringify(coordCimaAnt) !== JSON.stringify(objThat) &&
+            !pecasColmeia.find(item => item.linha == coordCimaAnt.linha && item.coluna == coordCimaAnt.coluna)) {
+            pecasColmeia.push(coordCimaAnt);
+        }
+        if( classeCimaDep && JSON.stringify(coordCimaDep) !== JSON.stringify(objThat) &&
+            !pecasColmeia.find(item => item.linha == coordCimaDep.linha && item.coluna == coordCimaDep.coluna)) {
+            pecasColmeia.push(coordCimaDep);
+        }
+        if( classeAnt && JSON.stringify(coordAnt) !== JSON.stringify(objThat) &&
+            !pecasColmeia.find(item => item.linha == coordAnt.linha && item.coluna == coordAnt.coluna)) {
+            pecasColmeia.push(coordAnt);
+        }
+        if( classeDep && JSON.stringify(coordDep) !== JSON.stringify(objThat) &&
+            !pecasColmeia.find(item => item.linha == coordDep.linha && item.coluna == coordDep.coluna)) {
+            pecasColmeia.push(coordDep);
+        }
+        if( classeBaixoAnt && JSON.stringify(coordBaixoAnt) !== JSON.stringify(objThat) &&
+            !pecasColmeia.find(item => item.linha == coordBaixoAnt.linha && item.coluna == coordBaixoAnt.coluna)) {
+            pecasColmeia.push(coordBaixoAnt);
+        }
+        if( classeBaixoDep && JSON.stringify(coordBaixoDep) !== JSON.stringify(objThat) &&
+            !pecasColmeia.find(item => item.linha == coordBaixoDep.linha && item.coluna == coordBaixoDep.coluna)) {
+            pecasColmeia.push(coordBaixoDep);
+        }
     }
 
-    if(!$(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") && 
-        !$(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") &&
-        ($(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") ||
-        $(that).prev().is(".player1, .player2")) &&
-        ($(that).next().is(".player1, .player2") ||
-        $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2"))) {
-            return true;
+    var verifica = false;
+    $("tr td[class='player1'], tr td[class='player2']").not(that).each(function () {
+        var objAux = {linha: parseInt($(this).parent().attr("data-linha")), coluna: parseInt($(this).attr("data-coluna"))};
+        if( !!pecasColmeia.find(item => item.linha == objAux.linha && item.coluna == objAux.coluna) )
+            return;
+        verifica = true; 
+        return false;
+    });
+
+    return verifica;
+};
+
+// gera os movimentos dos animais
+var geraOpcoesAnimais = function (that) {
+    nomeAnimal = $(that).find("img").attr("alt");
+
+    if(nomeAnimal == "Abelha") {
+        var textClassePeca = $(that).is(".player1") ? "player1" : "player2";
+
+        var col = parseInt($(that).attr("data-coluna"));
+        col = $(that).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+        var cimaAnt = $(that).parent().prev().find("[data-coluna='"+(col  )+"']"),
+            cimaDep = $(that).parent().prev().find("[data-coluna='"+(col+1)+"']"),
+            ant = $(that).prev(),
+            dep = $(that).next(),
+            baixoAnt = $(that).parent().next().find("[data-coluna='"+(col  )+"']"),
+            baixoDep = $(that).parent().next().find("[data-coluna='"+(col+1)+"']");
+
+        var cont = 0;
+        if($(cimaAnt).is(".player1, .player2"))
+            cont++;
+        if($(cimaDep).is(".player1, .player2"))
+            cont++;
+        if($(ant).is(".player1, .player2"))
+            cont++;
+        if($(dep).is(".player1, .player2"))
+            cont++;
+        if($(baixoAnt).is(".player1, .player2"))
+            cont++;
+        if($(baixoDep).is(".player1, .player2"))
+            cont++;
+        if(cont >= 5) {
+            $("td").removeClass(textClassePeca + "-select");
+            return;
+        }
+
+        var geraOpcoesAbelha = function (vazio) {
+            var textClassePecaVazio = $(vazio).is(".player1") ? "player1" : "player2";
+
+            if(!$(vazio).is(".player1, .player2")) {
+                var col = parseInt($(vazio).attr("data-coluna"));
+                col = $(vazio).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+
+                var cimaAntAux =   $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']")[0] == that ? false :
+                                $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2");
+                var cimaDepAux =   $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']")[0] == that ? false :
+                                $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2");
+                var antAux = $(vazio).prev()[0] == that ? false : $(vazio).prev().is(".player1, .player2");
+                var depAux = $(vazio).next()[0] == that ? false : $(vazio).next().is(".player1, .player2");
+                var baixoAntAux =  $(vazio).parent().next().find("[data-coluna='"+(col  )+"']")[0] == that ? false :
+                                $(vazio).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2");
+                var baixoDepAux =  $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']")[0] == that ? false :
+                                $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2");
+
+                var contAux = 0;
+                if(cimaAntAux)
+                    contAux++;
+                if(cimaDepAux)
+                    contAux++;
+                if(antAux)
+                    contAux++;
+                if(depAux)
+                    contAux++;
+                if(baixoAntAux)
+                    contAux++;
+                if(baixoDepAux)
+                    contAux++;
+                if(contAux > 0 && contAux < 5) {
+                    $(vazio).addClass("opcao");
+                }
+                /*
+                if(cimaAntAux || cimaDepAux || antAux || depAux || baixoAntAux || baixoDepAux)
+                    $(vazio).addClass("opcao");*/
+            }
+        }
+        geraOpcoesAbelha(cimaAnt);
+        geraOpcoesAbelha(cimaDep);
+        geraOpcoesAbelha(ant);
+        geraOpcoesAbelha(dep);
+        geraOpcoesAbelha(baixoAnt);
+        geraOpcoesAbelha(baixoDep);
+        pecaInsere = $(that);
+        
+
     }
 
-    if(!$(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2") && 
-        !$(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") &&
-        ($(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2") ||
-        $(that).next().is(".player1, .player2")) &&
-        ($(that).prev().is(".player1, .player2") ||
-        $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2"))) {
-            return true;
-    }
 
-    return false;
 };
 
 // Insere uma peça em um espaço vazio disponivel no tabuleiro
 var insPecTabu = function (that) {
     var textClassAliado = flagPlayer1 ? "player1" : "player2";
+    var pecas = flagPlayer1 ? pecasPlayer1 : pecasPlayer2;
     if($(pecaInsere).length == 1 && $(that).hasClass("opcao")) {
         $(that).append($(pecaInsere).html()).attr("class", flagPlayer1 ? "player1" : "player2");
         $("li").remove();
-        var pecas = flagPlayer1 ? pecasPlayer1 : pecasPlayer2;
-        for(var i=0; i<pecas.length; i++) 
-            if(pecas[i].nome == $(pecaInsere).find("img").attr("alt"))
-                pecas[i].nPecas = pecas[i].nPecas - 1 ;
+        if($(pecaInsere).prop("nodeName") == "LI") {
+            for(var i=0; i<pecas.length; i++) 
+                if(pecas[i].nome == $(pecaInsere).find("img").attr("alt"))
+                    pecas[i].nPecas = pecas[i].nPecas - 1 ;
+        } else {
+            $(pecaInsere).find("img").remove();
+            $(pecaInsere).removeClass(textClassAliado + "-select");
+            $(pecaInsere).removeClass(textClassAliado);
+            $(pecaInsere).addClass("undefined");
+        }
         flagPlayer1 = !flagPlayer1;
         $("td").removeClass("opcao");
         inserePecaTabuleiro(that);
@@ -454,9 +535,11 @@ var insPecTabu = function (that) {
             $("ul li").removeClass(textClassAliado + "-select");
             $("td").removeClass("opcao");
             $("td").removeClass(textClassePeca + "-select");
-            if(!verificaQuebraColmeia(that)) // true = quebra colmeia, false = não quebra
-                $(that).addClass(textClassePeca + "-select");
             pecaInsere = null;
+            if(!verificaQuebraColmeia(that) && pecas[0].nPecas == 0) {// true = quebra colmeia, false = não quebra
+                $(that).addClass(textClassePeca + "-select");
+                geraOpcoesAnimais(that);
+            }
         }
     }
 }
