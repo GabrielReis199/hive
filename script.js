@@ -334,17 +334,8 @@ var inserePecaTabuleiro = function (that) {
 }
 inserePecaTabuleiro();
 
-// Verifica se a peça selecionada quebra a colmeia
+// Verifica se a peça selecionada quebra a colmeia | true = quebra colmeia, false = não quebra
 var verificaQuebraColmeia = function (that) {
-    //true = quebra colmeia, false = não quebra
-    /*
-    $(that).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2")
-    $(that).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2")
-    $(that).prev().is(".player1, .player2")
-    $(that).next().is(".player1, .player2")
-    $(that).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2")
-    $(that).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2")
-    */
     var pecasColmeia = [
         {   linha: parseInt($("td").not(".undefined").first().parent().attr("data-linha")), 
             coluna: parseInt($("td").not(".undefined").first().attr("data-coluna")) }
@@ -501,11 +492,339 @@ var geraOpcoesAnimais = function (that) {
         geraOpcoesAbelha(baixoAnt);
         geraOpcoesAbelha(baixoDep);
         pecaInsere = $(that);
-        
-
     }
 
+    if(nomeAnimal == "Aranha") {
+        var textClassePeca = $(that).is(".player1") ? "player1" : "player2";
 
+        var col = parseInt($(that).attr("data-coluna"));
+        col = $(that).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+        var cimaAnt = $(that).parent().prev().find("[data-coluna='"+(col  )+"']"),
+            cimaDep = $(that).parent().prev().find("[data-coluna='"+(col+1)+"']"),
+            ant = $(that).prev(),
+            dep = $(that).next(),
+            baixoAnt = $(that).parent().next().find("[data-coluna='"+(col  )+"']"),
+            baixoDep = $(that).parent().next().find("[data-coluna='"+(col+1)+"']");
+
+        var cont = 0;
+        if($(cimaAnt).is(".player1, .player2"))
+            cont++;
+        if($(cimaDep).is(".player1, .player2"))
+            cont++;
+        if($(ant).is(".player1, .player2"))
+            cont++;
+        if($(dep).is(".player1, .player2"))
+            cont++;
+        if($(baixoAnt).is(".player1, .player2"))
+            cont++;
+        if($(baixoDep).is(".player1, .player2"))
+            cont++;
+        if(cont >= 5) {
+            $("td").removeClass(textClassePeca + "-select");
+            return;
+        } // Até aqui verifica se a peça que cliquei está cercada
+
+        var geraOpcoesAranha = function (vazio) {
+            if(!$(vazio).is(".player1, .player2")) {
+                var col = parseInt($(vazio).attr("data-coluna"));
+                col = $(vazio).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+
+                var cimaAntAux =   $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']")[0] == that ? false :
+                                $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2");
+                var cimaDepAux =   $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']")[0] == that ? false :
+                                $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2");
+                var antAux = $(vazio).prev()[0] == that ? false : $(vazio).prev().is(".player1, .player2");
+                var depAux = $(vazio).next()[0] == that ? false : $(vazio).next().is(".player1, .player2");
+                var baixoAntAux =  $(vazio).parent().next().find("[data-coluna='"+(col  )+"']")[0] == that ? false :
+                                $(vazio).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2");
+                var baixoDepAux =  $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']")[0] == that ? false :
+                                $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2");
+
+                var contAux = 0;
+                if(cimaAntAux)
+                    contAux++;
+                if(cimaDepAux)
+                    contAux++;
+                if(antAux)
+                    contAux++;
+                if(depAux)
+                    contAux++;
+                if(baixoAntAux)
+                    contAux++;
+                if(baixoDepAux)
+                    contAux++;
+                if(contAux > 0 && contAux < 5)
+                    caminhoPrimeiro.push(vazio);
+            }
+        }
+        var caminhoPrimeiro = [];
+        geraOpcoesAranha(cimaAnt);
+        geraOpcoesAranha(cimaDep);
+        geraOpcoesAranha(ant);
+        geraOpcoesAranha(dep);
+        geraOpcoesAranha(baixoAnt);
+        geraOpcoesAranha(baixoDep);
+
+        var caminhoSegundo = [];
+        for(var pecaCaminho of caminhoPrimeiro) {
+            var peca = pecaCaminho;
+
+            var col = parseInt($(peca).attr("data-coluna"));
+            col = $(peca).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+            var cimaAnt = $(peca).parent().prev().find("[data-coluna='"+(col  )+"']"),
+                cimaDep = $(peca).parent().prev().find("[data-coluna='"+(col+1)+"']"),
+                ant = $(peca).prev(),
+                dep = $(peca).next(),
+                baixoAnt = $(peca).parent().next().find("[data-coluna='"+(col  )+"']"),
+                baixoDep = $(peca).parent().next().find("[data-coluna='"+(col+1)+"']");
+
+            var geraOpcoesAranha2 = function (vazio) {
+                if(!$(vazio).is(".player1, .player2")) {
+                    var col = parseInt($(vazio).attr("data-coluna"));
+                    col = $(vazio).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+    
+                    var cimaAntAux = $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']")[0] == that || 
+                        $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']")[0] == peca ? false :
+                        $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2");
+                    var cimaDepAux = $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']")[0] == that ||
+                        $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']")[0] == peca ? false :
+                        $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2");
+                    var antAux = $(vazio).prev()[0] == that ||
+                        $(vazio).prev()[0] == peca ? false : 
+                        $(vazio).prev().is(".player1, .player2");
+                    var depAux = $(vazio).next()[0] == that ||
+                        $(vazio).next()[0] == peca ? false : 
+                        $(vazio).next().is(".player1, .player2");
+                    var baixoAntAux = $(vazio).parent().next().find("[data-coluna='"+(col  )+"']")[0] == that ||
+                        $(vazio).parent().next().find("[data-coluna='"+(col  )+"']")[0] == peca ? false :
+                        $(vazio).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2");
+                    var baixoDepAux =  $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']")[0] == that ||
+                        $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']")[0] == peca ? false :
+                        $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2");
+    
+                    var contAux = 0;
+                    if(cimaAntAux)
+                        contAux++;
+                    if(cimaDepAux)
+                        contAux++;
+                    if(antAux)
+                        contAux++;
+                    if(depAux)
+                        contAux++;
+                    if(baixoAntAux)
+                        contAux++;
+                    if(baixoDepAux)
+                        contAux++;
+                    if(contAux > 0 && contAux < 5)
+                        caminhoSegundo.push([pecaCaminho, vazio]);
+                }
+            }
+            //console.log(vazio, cimaAntAux, cimaDepAux, antAux, depAux, baixoAntAux, baixoDepAux)
+            //console.log(pecaCaminho, peca, cimaAnt, cimaDep, ant, dep, baixoAnt, baixoDep)
+            geraOpcoesAranha2(cimaAnt);
+            geraOpcoesAranha2(cimaDep);
+            geraOpcoesAranha2(ant);
+            geraOpcoesAranha2(dep);
+            geraOpcoesAranha2(baixoAnt);
+            geraOpcoesAranha2(baixoDep);
+        }
+
+        for(var pecaCaminho of caminhoSegundo) {
+            //console.log(pecaCaminho, pecaCaminho[0], pecaCaminho[1]);
+            var peca = pecaCaminho[1][0];
+
+            var col = parseInt($(peca).attr("data-coluna"));
+            col = $(peca).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+            var cimaAnt = $(peca).parent().prev().find("[data-coluna='"+(col  )+"']"),
+                cimaDep = $(peca).parent().prev().find("[data-coluna='"+(col+1)+"']"),
+                ant = $(peca).prev(),
+                dep = $(peca).next(),
+                baixoAnt = $(peca).parent().next().find("[data-coluna='"+(col  )+"']"),
+                baixoDep = $(peca).parent().next().find("[data-coluna='"+(col+1)+"']");
+
+            var geraOpcoesAranha3 = function (vazio) {
+                //console.log("-> ", $(vazio)[0], pecaCaminho[0][0], $(vazio)[0] == pecaCaminho[0][0]);
+                if($(vazio)[0] == pecaCaminho[0][0])
+                    return;
+                if(!$(vazio).is(".player1, .player2")) {
+                    var col = parseInt($(vazio).attr("data-coluna"));
+                    col = $(vazio).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+    
+                    var cimaAntAux = $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']")[0] == pecaCaminho[0][0] || 
+                        $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']")[0] == that || 
+                        $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']")[0] == peca ? false :
+                        $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2");
+                    var cimaDepAux = $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']")[0] == pecaCaminho[0][0] ||
+                        $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']")[0] == that ||
+                        $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']")[0] == peca ? false :
+                        $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2");
+                    var antAux = $(vazio).prev()[0] == pecaCaminho[0][0] ||
+                        $(vazio).prev()[0] == that ||
+                        $(vazio).prev()[0] == peca ? false : 
+                        $(vazio).prev().is(".player1, .player2");
+                    var depAux = $(vazio).next()[0] == pecaCaminho[0][0] ||
+                        $(vazio).next()[0] == that ||
+                        $(vazio).next()[0] == peca ? false : 
+                        $(vazio).next().is(".player1, .player2");
+                    var baixoAntAux = $(vazio).parent().next().find("[data-coluna='"+(col  )+"']")[0] == pecaCaminho[0][0] ||
+                        $(vazio).parent().next().find("[data-coluna='"+(col  )+"']")[0] == that ||
+                        $(vazio).parent().next().find("[data-coluna='"+(col  )+"']")[0] == peca ? false :
+                        $(vazio).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2");
+                    var baixoDepAux = $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']")[0] == pecaCaminho[0][0] ||
+                        $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']")[0] == that ||
+                        $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']")[0] == peca ? false :
+                        $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2");
+    
+                    var contAux = 0;
+                    if(cimaAntAux)
+                        contAux++;
+                    if(cimaDepAux)
+                        contAux++;
+                    if(antAux)
+                        contAux++;
+                    if(depAux)
+                        contAux++;
+                    if(baixoAntAux)
+                        contAux++;
+                    if(baixoDepAux)
+                        contAux++;
+                    //console.log(vazio, cimaAntAux, cimaDepAux, antAux, depAux, baixoAntAux, baixoDepAux)
+                    if(contAux > 0 && contAux < 5)
+                        $(vazio).addClass("opcao");
+                }
+            }
+            //console.log(peca, cimaAnt, cimaDep, ant, dep, baixoAnt, baixoDep)
+            geraOpcoesAranha3(cimaAnt);
+            geraOpcoesAranha3(cimaDep);
+            geraOpcoesAranha3(ant);
+            geraOpcoesAranha3(dep);
+            geraOpcoesAranha3(baixoAnt);
+            geraOpcoesAranha3(baixoDep);
+        }
+        pecaInsere = $(that);
+    }
+
+    if(nomeAnimal == "Formiga") {
+        $("tr td[class='player1'], tr td[class='player2']").each(function () {
+            var col = parseInt($(this).attr("data-coluna"));
+            col = $(this).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+            var cimaAnt = $(this).parent().prev().find("[data-coluna='"+(col  )+"']"),
+                cimaDep = $(this).parent().prev().find("[data-coluna='"+(col+1)+"']"),
+                ant = $(this).prev(),
+                dep = $(this).next(),
+                baixoAnt = $(this).parent().next().find("[data-coluna='"+(col  )+"']"),
+                baixoDep = $(this).parent().next().find("[data-coluna='"+(col+1)+"']");
+
+            
+            var geraOpcoesFormiga = function (vazio) {
+                if(!$(vazio).is(".player1, .player2")) {
+                    var col = parseInt($(vazio).attr("data-coluna"));
+                    col = $(vazio).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+
+                    var cimaAntAux = $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2");
+                    var cimaDepAux = $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2");
+                    var antAux = $(vazio).prev().is(".player1, .player2");
+                    var depAux = $(vazio).next().is(".player1, .player2");
+                    var baixoAntAux = $(vazio).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2");
+                    var baixoDepAux = $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2");
+
+                    var contAux = 0;
+                    if(cimaAntAux)
+                        contAux++;
+                    if(cimaDepAux)
+                        contAux++;
+                    if(antAux)
+                        contAux++;
+                    if(depAux)
+                        contAux++;
+                    if(baixoAntAux)
+                        contAux++;
+                    if(baixoDepAux)
+                        contAux++;
+                    if(contAux > 0 && contAux < 5)
+                        $(vazio).addClass("opcao");
+                }
+            }
+            geraOpcoesFormiga(cimaAnt);
+            geraOpcoesFormiga(cimaDep);
+            geraOpcoesFormiga(ant);
+            geraOpcoesFormiga(dep);
+            geraOpcoesFormiga(baixoAnt);
+            geraOpcoesFormiga(baixoDep);
+            pecaInsere = $(that);
+        });
+    }
+
+    if(nomeAnimal == "Gafanhoto") {
+        var col = parseInt($(that).attr("data-coluna"));
+        col = $(that).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+        var cimaAnt = $(that).parent().prev().find("[data-coluna='"+(col  )+"']"),
+            cimaDep = $(that).parent().prev().find("[data-coluna='"+(col+1)+"']"),
+            ant = $(that).prev(),
+            dep = $(that).next(),
+            baixoAnt = $(that).parent().next().find("[data-coluna='"+(col  )+"']"),
+            baixoDep = $(that).parent().next().find("[data-coluna='"+(col+1)+"']");
+
+        var classeCimaAnt = $(cimaAnt).is(".player1, .player2"),
+            classeCimaDep = $(cimaDep).is(".player1, .player2"),
+            classeAnt = $(ant).is(".player1, .player2"),
+            classeDep = $(dep).is(".player1, .player2"),
+            classeBaixoAnt = $(baixoAnt).is(".player1, .player2"),
+            classeBaixoDep = $(baixoDep).is(".player1, .player2");
+
+        if(classeCimaAnt) {
+            while($(cimaAnt).is(".player1, .player2")) {
+                col = parseInt($(cimaAnt).attr("data-coluna"));
+                col = $(cimaAnt).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+                cimaAnt = $(cimaAnt).parent().prev().find("[data-coluna='"+(col  )+"']");
+            }
+            if($(cimaAnt).is(".undefined"))
+                $(cimaAnt).addClass("opcao");
+        }
+        if(classeCimaDep) {
+            while($(cimaDep).is(".player1, .player2")) {
+                col = parseInt($(cimaDep).attr("data-coluna"));
+                col = $(cimaDep).parent().prevAll().length % 2 == 0 ? col : col + 1;
+                cimaDep = $(cimaDep).parent().prev().find("[data-coluna='"+(col)+"']");
+            }
+            if($(cimaDep).is(".undefined"))
+                $(cimaDep).addClass("opcao");
+        }
+        if(classeAnt) {
+            while($(ant).is(".player1, .player2")) 
+                ant = $(ant).prev();
+            if($(ant).is(".undefined"))
+                $(ant).addClass("opcao");
+        }
+        if(classeDep) {
+            while($(dep).is(".player1, .player2")) 
+                dep = $(dep).next();
+            if($(dep).is(".undefined"))
+                $(dep).addClass("opcao");
+        }
+        if(classeBaixoAnt) {
+            while($(baixoAnt).is(".player1, .player2")) {
+                col = parseInt($(baixoAnt).attr("data-coluna"));
+                col = $(baixoAnt).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+                baixoAnt = $(baixoAnt).parent().next().find("[data-coluna='"+(col  )+"']");
+            }
+            if($(baixoAnt).is(".undefined"))
+                $(baixoAnt).addClass("opcao");
+        }
+        if(classeBaixoDep) {
+            while($(baixoDep).is(".player1, .player2")) {
+                col = parseInt($(baixoDep).attr("data-coluna"));
+                col = $(baixoDep).parent().prevAll().length % 2 == 0 ? col : col + 1;
+                baixoDep = $(baixoDep).parent().next().find("[data-coluna='"+(col)+"']");
+            }
+            console.log(baixoDep, col);
+            if($(baixoDep).is(".undefined"))
+                $(baixoDep).addClass("opcao");
+        }
+        pecaInsere = $(that);
+    }
+
+    
 };
 
 // Insere uma peça em um espaço vazio disponivel no tabuleiro
