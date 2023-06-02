@@ -13,12 +13,12 @@ var pecasPlayer1 = structuredClone(vetPecas);
 var pecasPlayer2 = structuredClone(vetPecas);
 
 flagPlayer1 = true;
-contadorRodadas = 0;
-
+var contadorRodadas = 0;
 var pecaInsere = null;
 
 // Gera as coordenadas das peças em campo.
 var geraCoordenadas = function () {
+    // Coloca as coordenadas na linha 50
     contadorAntes  = 50;
     contadorDepois = 50;
     $("tr[data-linha=50] td[data-coluna=50]").prevAll().each(function () {
@@ -28,6 +28,7 @@ var geraCoordenadas = function () {
         $(this).attr("data-coluna", ++contadorDepois);
     });
 
+    // Coloca o restante das coordenadas
     contadorInicio = $("tr[data-linha=50] td:first").attr("data-coluna");
     $("tr[data-linha=50]").prevAll().each(function () {
         $(this).find("td").each(function () {
@@ -318,7 +319,6 @@ var inserePecaTabuleiro = function (that) {
             $("table").css({"top": "0px", "left": "-19.5px"});
             flagPlayer1 = !flagPlayer1;
             getPecasDisponiveis();
-            pecaInsere = null;
         })
     } else {
         if($(that).next().length == 0)
@@ -329,8 +329,8 @@ var inserePecaTabuleiro = function (that) {
             geraTabuleiro(false, false, false, true);
         if($(that).parent().prev().length == 0)
             geraTabuleiro(false, true, false, false);
-        pecaInsere = null;
     }
+    pecaInsere = null;
 }
 inserePecaTabuleiro();
 
@@ -817,14 +817,79 @@ var geraOpcoesAnimais = function (that) {
                 col = $(baixoDep).parent().prevAll().length % 2 == 0 ? col : col + 1;
                 baixoDep = $(baixoDep).parent().next().find("[data-coluna='"+(col)+"']");
             }
-            console.log(baixoDep, col);
             if($(baixoDep).is(".undefined"))
                 $(baixoDep).addClass("opcao");
         }
         pecaInsere = $(that);
     }
 
-    
+    if(nomeAnimal == "Besouro") {
+        var textClassePeca = $(that).is(".player1") ? "player1" : "player2";
+
+        var col = parseInt($(that).attr("data-coluna"));
+        col = $(that).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+        var cimaAnt = $(that).parent().prev().find("[data-coluna='"+(col  )+"']"),
+            cimaDep = $(that).parent().prev().find("[data-coluna='"+(col+1)+"']"),
+            ant = $(that).prev(),
+            dep = $(that).next(),
+            baixoAnt = $(that).parent().next().find("[data-coluna='"+(col  )+"']"),
+            baixoDep = $(that).parent().next().find("[data-coluna='"+(col+1)+"']");
+
+        if($(cimaAnt).is(".player1, .player2"))
+            $(cimaAnt).addClass($(cimaAnt).is(".player1") ? "opcao-player1-select": "opcao-player2-select");
+        if($(cimaDep).is(".player1, .player2"))
+            $(cimaDep).addClass($(cimaDep).is(".player1") ? "opcao-player1-select": "opcao-player2-select");
+        if($(ant).is(".player1, .player2"))
+            $(ant).addClass($(ant).is(".player1") ? "opcao-player1-select": "opcao-player2-select");
+        if($(dep).is(".player1, .player2"))
+            $(dep).addClass($(dep).is(".player1") ? "opcao-player1-select": "opcao-player2-select");
+        if($(baixoAnt).is(".player1, .player2"))
+            $(baixoAnt).addClass($(baixoAnt).is(".player1") ? "opcao-player1-select": "opcao-player2-select");
+        if($(baixoDep).is(".player1, .player2"))
+            $(baixoDep).addClass($(baixoDep).is(".player1") ? "opcao-player1-select": "opcao-player2-select");
+
+        var geraOpcoesBesouro = function (vazio) {
+            if(!$(vazio).is(".player1, .player2")) {
+                var col = parseInt($(vazio).attr("data-coluna"));
+                col = $(vazio).parent().prevAll().length % 2 == 0 ? col - 1 : col;
+
+                var cimaAntAux =   $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']")[0] == that ? false :
+                                $(vazio).parent().prev().find("[data-coluna='"+(col  )+"']").is(".player1, .player2");
+                var cimaDepAux =   $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']")[0] == that ? false :
+                                $(vazio).parent().prev().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2");
+                var antAux = $(vazio).prev()[0] == that ? false : $(vazio).prev().is(".player1, .player2");
+                var depAux = $(vazio).next()[0] == that ? false : $(vazio).next().is(".player1, .player2");
+                var baixoAntAux =  $(vazio).parent().next().find("[data-coluna='"+(col  )+"']")[0] == that ? false :
+                                $(vazio).parent().next().find("[data-coluna='"+(col  )+"']").is(".player1, .player2");
+                var baixoDepAux =  $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']")[0] == that ? false :
+                                $(vazio).parent().next().find("[data-coluna='"+(col+1)+"']").is(".player1, .player2");
+
+                var contAux = 0;
+                if(cimaAntAux)
+                    contAux++;
+                if(cimaDepAux)
+                    contAux++;
+                if(antAux)
+                    contAux++;
+                if(depAux)
+                    contAux++;
+                if(baixoAntAux)
+                    contAux++;
+                if(baixoDepAux)
+                    contAux++;
+                if(contAux > 0 && contAux < 5) {
+                    $(vazio).addClass("opcao");
+                }
+            }
+        }
+        geraOpcoesBesouro(cimaAnt);
+        geraOpcoesBesouro(cimaDep);
+        geraOpcoesBesouro(ant);
+        geraOpcoesBesouro(dep);
+        geraOpcoesBesouro(baixoAnt);
+        geraOpcoesBesouro(baixoDep);
+        pecaInsere = $(that);
+    }
 };
 
 // Insere uma peça em um espaço vazio disponivel no tabuleiro
@@ -845,14 +910,22 @@ var insPecTabu = function (that) {
             $(pecaInsere).addClass("undefined");
         }
         flagPlayer1 = !flagPlayer1;
-        $("td").removeClass("opcao");
+        $("td").removeClass("opcao opcao-player1-select opcao-player2-select");
+        inserePecaTabuleiro(that);
+        getPecasDisponiveis();
+    } else if((pecaInsere).length == 1 && $(that).is(".opcao-player1-select, .opcao-player2-select")) {
+
+        $("li").remove();
+
+        flagPlayer1 = !flagPlayer1;
+        $("td").removeClass("opcao opcao-player1-select opcao-player2-select");
         inserePecaTabuleiro(that);
         getPecasDisponiveis();
     } else if($(that).hasClass(textClassAliado)){
         var textClassePeca = $(that).is(".player1") ? "player1" : "player2";
         if(textClassAliado == textClassePeca) {
             $("ul li").removeClass(textClassAliado + "-select");
-            $("td").removeClass("opcao");
+            $("td").removeClass("opcao opcao-player1-select opcao-player2-select");
             $("td").removeClass(textClassePeca + "-select");
             pecaInsere = null;
             if(!verificaQuebraColmeia(that) && pecas[0].nPecas == 0) {// true = quebra colmeia, false = não quebra

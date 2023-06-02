@@ -211,6 +211,14 @@ td img {
     background-color: #5c5c5c;
 }
 
+.opcao-player1-select{
+    background-color: #c0974b;
+}
+
+.opcao-player2-select{
+    background-color: #b97acc;
+}
+
 #esquerda,
 #direita {
     box-shadow: 0 -2px 12px rgb(202, 202, 202);
