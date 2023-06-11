@@ -287,10 +287,29 @@ var verificaQuebraColmeia = function (that) {
     if($(that).find("img").length > 1) // Se a peça estiver em cima de outra pode mover livremente
         return false;
 
-    var pecasColmeia = [
-        {   linha: parseInt($("td").not(".undefined").first().parent().attr("data-linha")), 
-            coluna: parseInt($("td").not(".undefined").first().attr("data-coluna")) }
-    ];
+    var vizinhosThat = geraVizinhosPecaIndividual(that);
+    var pecaInicioMontaColmeia = null;
+    $("tr td[class='player1'], tr td[class='player2']").each(function () {
+        if(this == that || vizinhosThat.some(v => v[0] == this))
+            return;
+        
+        pecaInicioMontaColmeia = this;
+        return false;
+    });
+    
+    var pecasColmeia = null;
+    if(pecaInicioMontaColmeia == null) {
+        pecasColmeia =  [
+            {   linha: parseInt($("tr td").not(".undefined").first().parent().attr("data-linha")), 
+                coluna: parseInt($("tr td").not(".undefined").first().attr("data-coluna")) }
+        ];
+    } else {
+        pecasColmeia = [
+            {   linha: parseInt($(pecaInicioMontaColmeia).parent().attr("data-linha")), 
+                coluna: parseInt($(pecaInicioMontaColmeia).attr("data-coluna")) }
+        ];
+    }
+
     var objThat = {linha: parseInt($(that).parent().attr("data-linha")), coluna: parseInt($(that).attr("data-coluna"))};
 
     for(var pecaColmeia of pecasColmeia) {
@@ -343,6 +362,12 @@ var verificaQuebraColmeia = function (that) {
             pecasColmeia.push(coordBaixoDep);
         }
     }
+/*
+    console.log("___________________ A")
+    pecasColmeia.forEach((i) => console.log($("tr[data-linha='"+i.linha+"'] td[data-coluna='"+i.coluna+"']")[0]));
+    console.log(that, "that");
+    console.log($("tr td[class*='player1'], tr td[class*='player2']").not(that));
+    console.log("___________________ Z")*/
 
     var verifica = false;
     $("tr td[class*='player1'], tr td[class*='player2']").not(that).each(function () {
@@ -385,7 +410,12 @@ var verificaLiberdadeDeMovimento = function (vizinhosItem, that) {
 
 // Gera os movimentos dos animais
 var geraOpcoesAnimais = function (that) {
-    nomeAnimal = $(that).find("img:last").attr("alt");
+    var nomeAnimal = null;
+    if($(that).attr("data-copia-mosquito") != undefined) {
+        nomeAnimal = $(that).attr("data-copia-mosquito");
+        $("td").removeAttr("data-copia-mosquito");
+    } else
+        nomeAnimal = $(that).find("img:last").attr("alt");
 
     if(nomeAnimal == "Abelha") {
         var vizinhosAbelha = geraVizinhosPecaIndividual(that);
@@ -660,13 +690,13 @@ var geraOpcoesAnimais = function (that) {
     if(nomeAnimal == "Tatu") {
         var vizinhosTatu = geraVizinhosPecaIndividual(that);
 
-        if($("tr td[class*='player1-tatu'], tr td[class*='player2-tatu']").length > 0) {
+        if($("tr td[class*='player1-pisca'], tr td[class*='player2-pisca']").length > 0) {
             vizinhosTatu.forEach(function (item) {
                 if(!$(item).is(".player1, .player2"))
                     $(item).addClass("opcao");
             });
 
-            var novoThat = $("tr td[class*='player1-tatu'], tr td[class*='player2-tatu']");
+            var novoThat = $("tr td[class*='player1-pisca'], tr td[class*='player2-pisca']");
             pecaInsere = $(novoThat);
         } else {
             vizinhosTatu.forEach(function (item) {
@@ -688,6 +718,34 @@ var geraOpcoesAnimais = function (that) {
             });
             
             pecaInsere = $(that);
+        }
+    }
+
+    if(nomeAnimal == "Mosquito") {
+        var vizinhosMosquito = geraVizinhosPecaIndividual(that);
+        var opcoesMosquito = [];
+
+        if($(that).find("img").length > 1) {
+            var thatEnvia = $(that).attr("data-copia-mosquito", "Besouro");
+            geraOpcoesAnimais(thatEnvia[0]);
+        } else if($("tr td[class*='player1-pisca'], tr td[class*='player2-pisca']").length > 0) {
+            var animalEnvia = $("tr td[class*='player1-pisca'], tr td[class*='player2-pisca']").find("img:last").attr("alt");
+            var thatEnvia = $(that).attr("data-copia-mosquito", animalEnvia);
+            geraOpcoesAnimais(thatEnvia[0]);
+        } else {
+            vizinhosMosquito.forEach(function (item) {
+                if($(item).is(".player1, .player2") && $(item).find("img:last").attr("alt") != "Mosquito")
+                    opcoesMosquito.push(item);
+            });
+
+            if(opcoesMosquito.length > 0) {
+                opcoesMosquito.forEach(function (item) {
+                    $(item).addClass($(item).is(".player1") ? "opcao-player1-select": "opcao-player2-select");
+                });
+                pecaInsere = $(that);
+            } else {
+                $(that).removeClass("player1-select player2-select");
+            }
         }
     }
 };
@@ -752,14 +810,20 @@ var insPecTabu = function (that) {
         $("#modalPilha").empty().hide();
         $("li").remove();
         flagPlayer1 = !flagPlayer1;
-        $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-tatu player2-tatu");
+        $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-pisca player2-pisca");
         atualizaTabuleiro(that);
         getPecasDisponiveis();
     // Se tem pecaInsere marcada e cliquei em opcao para besouro
     } else if(pecaInsere != null && $(that).is(".opcao-player1-select, .opcao-player2-select")) {
         if($(pecaInsere).find("img").attr("alt") == "Tatu") {
-            console.log("Tatu foi!");
-            $(that).addClass(textClassAliado + "-tatu");
+            var corThat = $(that).is(".player1") ? "player1" : "player2";
+            $(that).addClass(corThat + "-pisca");
+            $("td").removeClass("opcao opcao-player1-select opcao-player2-select");
+            geraOpcoesAnimais(pecaInsere);
+        } else if($(pecaInsere).find("img").attr("alt") == "Mosquito" 
+            && $("tr td[class*='player1-pisca'], tr td[class*='player2-pisca']").length == 0) {
+            var corThat = $(that).is(".player1") ? "player1" : "player2";
+            $(that).addClass(corThat + "-pisca");
             $("td").removeClass("opcao opcao-player1-select opcao-player2-select");
             geraOpcoesAnimais(pecaInsere);
         } else {
@@ -788,7 +852,7 @@ var insPecTabu = function (that) {
             $("#modalPilha").empty().hide();
             $("li").remove();
             flagPlayer1 = !flagPlayer1;
-            $("td").removeClass("opcao opcao-player1-select opcao-player2-select");
+            $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-pisca player2-pisca");
             atualizaTabuleiro(that);
             getPecasDisponiveis();
         }
@@ -798,7 +862,7 @@ var insPecTabu = function (that) {
         if(textClassAliado == textClassePeca) {
             $("ul li").removeClass("player1-select player2-select");
             $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-select player2-select "+
-                "player1-tatu player2-tatu");
+                "player1-pisca player2-pisca");
             pecaInsere = null;
             if(!verificaQuebraColmeia(that) && pecas[0].nPecas == 0) {// true = quebra colmeia, false = não quebra
                 $(that).addClass(textClassePeca + "-select");
@@ -811,7 +875,7 @@ var insPecTabu = function (that) {
     } else{
         $("ul li").removeClass("player1-select player2-select");
         $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-select player2-select "+
-            "player1-tatu player2-tatu");
+            "player1-pisca player2-pisca");
         $("#modalPilha").empty().hide();
         if($(that).find("img").length > 1)
             geraModalPilhaInsetos(that);
@@ -872,7 +936,7 @@ var movimentacaoTabuleiro = function () {
     $("#btnTiraSelecao").click(function () {
         $("ul li").removeClass("player1-select player2-select");
         $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-select player2-select "+
-            "player1-tatu player2-tatu");
+            "player1-pisca player2-pisca");
         $("#modalPilha").empty().hide();
     });
 };

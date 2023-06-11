@@ -219,7 +219,7 @@ td img {
     background-color: #b97acc;
 }
 
-.player1-tatu {
+.player1-pisca {
     animation: tatu1 800ms infinite alternate;
 } 
 @keyframes tatu1 {
@@ -231,7 +231,7 @@ td img {
     }
 }
 
-.player2-tatu {
+.player2-pisca {
     animation: tatu2 800ms infinite alternate;
 } 
 @keyframes tatu2 {
