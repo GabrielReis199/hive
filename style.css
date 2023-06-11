@@ -219,6 +219,50 @@ td img {
     background-color: #b97acc;
 }
 
+.player1-tatu {
+    animation: tatu1 800ms infinite alternate;
+} 
+@keyframes tatu1 {
+    from {
+        background-color: #f5b132;
+    }
+    to {
+        background-color: #c78100;
+    }
+}
+
+.player2-tatu {
+    animation: tatu2 800ms infinite alternate;
+} 
+@keyframes tatu2 {
+    from {
+        background-color: #915ea0;
+    }
+    to {
+        background-color: #992fb9;
+    }
+}
+
+/*
+.qtd-pecas {
+    position: relative;
+}
+*/
+/*
+.qtd-pecas::after {
+    content: "2";
+    text-align: center;
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    bottom: 10px;
+    right: 15px;
+    color: white;
+    border: 1px solid #000;
+    border-radius: 50%;
+    background-color: rgb(168, 33, 33);
+}
+*/
 #esquerda,
 #direita {
     box-shadow: 0 -2px 12px rgb(202, 202, 202);
@@ -319,4 +363,55 @@ li img {
 
 #btnLeft img {
     transform: rotate(180deg);
+}
+
+#modalPilha {
+    box-shadow: 0 2px 12px rgb(202, 202, 202);
+    position: absolute;
+    background-color:#f0eeee;
+    bottom: 30px;
+    right: 30px;
+    z-index: 100;
+    height: 70px;
+    column-gap: 3px;
+    padding: 0 5px;
+    display: flex;
+    align-items: center;
+    counter-reset: item;
+    transition: 500ms;
+}
+
+.pecaPilha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 50px;
+    height: 50px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    counter-increment: item;
+    position: relative;
+}
+
+.pecaPilha img {
+    width: 32px;
+    margin-top: -5px;
+}
+
+.pecaPilha::after {
+    position: absolute;
+    bottom: 6px; 
+    right: 9px;
+    margin: 0 auto;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    border: 1px solid #000;
+    align-items: center;
+    content: " " counter(item);
+    height: 11px;
+    width: 11px;
+    background-color: rgb(168, 33, 33);
+    color: #000;
+    font-size: 10px;
 }
