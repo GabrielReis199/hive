@@ -15,8 +15,9 @@ var pecasPlayer2 = structuredClone(vetPecas);
 flagPlayer1 = true;
 var contadorRodadas = 0;
 var pecaInsere = null;
+var flagMovimenta = false;
 
-// Gera as coordenadas das peças em campo - ok
+// Gera as coordenadas das peças em campo
 var geraCoordenadas = function () {
     // Coloca as coordenadas na linha 50
     contadorAntes  = 50;
@@ -44,7 +45,7 @@ var geraCoordenadas = function () {
     });
 };
 
-// Gera os vizinhos de cada peça inserida no tabuleiro - ok
+// Gera os vizinhos de cada peça inserida no tabuleiro
 var regulaTab = 1;
 var geraTabuleiro = function (left, top, right, bottom) {
     if($("tbody tr").length == 0) {
@@ -111,7 +112,7 @@ var geraTabuleiro = function (left, top, right, bottom) {
     });
 }
 
-// Gera um vetor com os vezinhos cimaAnt, cimaDep, ant, dep, baixoAnt e baixoDep  - ok
+// Gera um vetor com os vezinhos cimaAnt, cimaDep, ant, dep, baixoAnt e baixoDep
 var geraVizinhosPecaIndividual = function (that) {
     var col = parseInt($(that).attr("data-coluna"));
         col = $(that).parent().prevAll().length % 2 == 0 ? col - 1 : col;
@@ -128,7 +129,7 @@ var geraVizinhosPecaIndividual = function (that) {
     return vetPosicoes;
 };
 
-// Marca as tds disponíveis no tabuleiro ao inserir uma nova peça - ok
+// Marca as tds disponíveis no tabuleiro ao inserir uma nova peça
 var mapeamentoEspacosDisponiveis = function () {
     var classeOponente = !flagPlayer1 ? ".player1" : ".player2";
     var classeAliado =    flagPlayer1 ? ".player1" : ".player2";
@@ -163,13 +164,76 @@ var mapeamentoEspacosDisponiveis = function () {
             return;
 
         $(this).addClass("opcao");
+        flagMovimenta = true;
     });
 }
 
-// Atualiza as peças disponíveis para jogo a cada rodada passada - ok
+// Cria a mensagem abaixo do header
+var criaCampoMensagem = function (mensagem, CodCorBarra, tempo) {
+    var corBarra = "#999898"
+    if(CodCorBarra == 1)
+        corBarra = "#f5b132";
+    else if(CodCorBarra == 2)
+        corBarra = "#915ea0";
+    var style = " style='animation: barra-msg "+(tempo/1000)+"s infinite; background-color: "+corBarra+";'";
+
+    $("#bloqueiaIteracao").show();
+    $(".campoMensagem").remove();
+    $("#infoJogo").append("<div class='campoMensagem'><div class='barraMensagem' "+style+"></div>"
+        +"<p>"+mensagem+"</p></div>")
+    var flagInterval = setTimeout(function () {
+        $(".campoMensagem").remove();
+        $("#bloqueiaIteracao").hide();
+    }, tempo);
+    $(".campoMensagem").click(function () {
+        $(".campoMensagem").slideUp();
+    });
+}
+
+var flagVerificaSePodeJogar = true;
+var verificaSePodeJogar = function () {
+    var verificaNovoInseto = false;
+    flagMovimenta = false;
+    
+    if(contadorRodadas > 1) {
+        flagVerificaSePodeJogar = false;
+        mapeamentoEspacosDisponiveis();
+        $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-pisca player2-pisca");
+        if(!flagMovimenta)
+            verificaNovoInseto = true;
+        flagMovimenta = false;
+
+        var corAtual = flagPlayer1 ? "player1" : "player2"
+        $("tr td[class='" + corAtual + "']").each(function () {
+            if($(this).find("img").attr("alt") == "Tatu" || !verificaQuebraColmeia(this)) {
+                geraOpcoesAnimais(this);
+            }
+            $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-pisca player2-pisca");
+            if(flagMovimenta)
+                return false;
+        });
+
+        if(verificaNovoInseto && !flagMovimenta) {
+            criaCampoMensagem("Impossível mover ou inserir novos insetos, passa a vez!", flagPlayer1 ? 1 : 2, 2000);
+            var divLado = flagPlayer1 ? "#direita" : "#esquerda";
+            $(divLado).prop("disabled", false).css('pointer-events', 'none');
+            setTimeout(function () {
+                $("li").remove();
+                flagPlayer1 = !flagPlayer1;
+                getPecasDisponiveis();
+            }, 2000);
+        }
+    }
+    flagVerificaSePodeJogar = true;
+};
+
+// Atualiza as peças disponíveis para jogo a cada rodada passada
 var getPecasDisponiveis = function () {
-    if(flagPlayer1)
+    if(flagPlayer1) {
         $("#contador").text(++contadorRodadas);
+        criaCampoMensagem("Vez do amarelo!!", 1, 1000);
+    } else 
+        criaCampoMensagem("Vez do Roxo!!", 2, 1000);
     
     var reduzTamanhoMenuEInserePecasDisponiveis = function (divLadoOpc, pecasOpc, textClasseOpc) {
         $(divLadoOpc).toggleClass("vez-" + textClasseOpc);
@@ -249,11 +313,12 @@ var getPecasDisponiveis = function () {
     $("ul li:first").trigger("click");
     $("ul li").removeClass("player1-select player2-select");
     $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-select player2-select");
+    verificaSePodeJogar();
 }
-getPecasDisponiveis();
+$("#direita").removeClass("vez-player1");
 $("#esquerda").removeClass("vez-player2");
 
-// Inicia o tabuleiro e chama as funções para criar os visinhos das peças - ok
+// Inicia o tabuleiro e chama as funções para criar os visinhos das peças
 var atualizaTabuleiro = function (that) {
     $("main").css('pointer-events', 'none');
     if($("tbody tr").length == 0) {
@@ -282,7 +347,7 @@ var atualizaTabuleiro = function (that) {
 }
 atualizaTabuleiro();
 
-// Verifica se a peça selecionada quebra a colmeia | true = quebra colmeia, false = não quebra - ok
+// Verifica se a peça selecionada quebra a colmeia | true = quebra colmeia, false = não quebra
 var verificaQuebraColmeia = function (that) {
     if($(that).find("img").length > 1) // Se a peça estiver em cima de outra pode mover livremente
         return false;
@@ -362,8 +427,8 @@ var verificaQuebraColmeia = function (that) {
             pecasColmeia.push(coordBaixoDep);
         }
     }
-/*
-    console.log("___________________ A")
+
+    /*console.log("___________________ A")
     pecasColmeia.forEach((i) => console.log($("tr[data-linha='"+i.linha+"'] td[data-coluna='"+i.coluna+"']")[0]));
     console.log(that, "that");
     console.log($("tr td[class*='player1'], tr td[class*='player2']").not(that));
@@ -377,6 +442,9 @@ var verificaQuebraColmeia = function (that) {
         verifica = true; 
         return false;
     });
+
+    if(flagVerificaSePodeJogar && verifica)
+        criaCampoMensagem("Impossível mover esse inseto pois irá quebrar a colmeia!!", flagPlayer1 ? 1 : 2, 2000);
 
     return verifica;
 };
@@ -438,6 +506,7 @@ var geraOpcoesAnimais = function (that) {
 
         if(opcoesAbelha.length > 0) {
             opcoesAbelha.forEach((item) => $(item).addClass("opcao"));
+            flagMovimenta = true;
             pecaInsere = $(that);
         } else {
             $(that).removeClass("player1-select player2-select");
@@ -506,6 +575,7 @@ var geraOpcoesAnimais = function (that) {
 
         if(opcoesAranha.length > 0) {
             opcoesAranha.forEach((item) => $(item).addClass("opcao"));
+            flagMovimenta = true;
             pecaInsere = $(that);
         } else {
             $(that).removeClass("player1-select player2-select");
@@ -561,7 +631,7 @@ var geraOpcoesAnimais = function (that) {
                 }
             }
             opcoesFormiga.forEach((item) => $(item).addClass("opcao"));
-
+            flagMovimenta = true;
             pecaInsere = $(that);
         } else {
             $(that).removeClass("player1-select player2-select");
@@ -577,8 +647,10 @@ var geraOpcoesAnimais = function (that) {
                 col = $(vizinhosGafanhoto[0]).parent().prevAll().length % 2 == 0 ? col - 1 : col;
                 vizinhosGafanhoto[0] = $(vizinhosGafanhoto[0]).parent().prev().find("[data-coluna='"+(col)+"']");
             }
-            if($(vizinhosGafanhoto[0]).is(".undefined"))
+            if($(vizinhosGafanhoto[0]).is(".undefined")) {
                 $(vizinhosGafanhoto[0]).addClass("opcao");
+                flagMovimenta = true;
+            }
         }
         if($(vizinhosGafanhoto[1]).is(".player1, .player2")) {
             while($(vizinhosGafanhoto[1]).is(".player1, .player2")) {
@@ -586,20 +658,26 @@ var geraOpcoesAnimais = function (that) {
                 col = $(vizinhosGafanhoto[1]).parent().prevAll().length % 2 == 0 ? col : col + 1;
                 vizinhosGafanhoto[1] = $(vizinhosGafanhoto[1]).parent().prev().find("[data-coluna='"+(col)+"']");
             }
-            if($(vizinhosGafanhoto[1]).is(".undefined"))
+            if($(vizinhosGafanhoto[1]).is(".undefined")) {
                 $(vizinhosGafanhoto[1]).addClass("opcao");
+                flagMovimenta = true;
+            }
         }
         if($(vizinhosGafanhoto[2]).is(".player1, .player2")) {
             while($(vizinhosGafanhoto[2]).is(".player1, .player2")) 
                 vizinhosGafanhoto[2] = $(vizinhosGafanhoto[2]).prev();
-            if($(vizinhosGafanhoto[2]).is(".undefined"))
+            if($(vizinhosGafanhoto[2]).is(".undefined")) {
                 $(vizinhosGafanhoto[2]).addClass("opcao");
+                flagMovimenta = true;
+            }
         }
         if($(vizinhosGafanhoto[3]).is(".player1, .player2")) {
             while($(vizinhosGafanhoto[3]).is(".player1, .player2")) 
                 vizinhosGafanhoto[3] = $(vizinhosGafanhoto[3]).next();
-            if($(vizinhosGafanhoto[3]).is(".undefined"))
+            if($(vizinhosGafanhoto[3]).is(".undefined")) {
                 $(vizinhosGafanhoto[3]).addClass("opcao");
+                flagMovimenta = true;
+            }
         }
         if($(vizinhosGafanhoto[4]).is(".player1, .player2")) {
             while($(vizinhosGafanhoto[4]).is(".player1, .player2")) {
@@ -607,8 +685,10 @@ var geraOpcoesAnimais = function (that) {
                 col = $(vizinhosGafanhoto[4]).parent().prevAll().length % 2 == 0 ? col - 1 : col;
                 vizinhosGafanhoto[4] = $(vizinhosGafanhoto[4]).parent().next().find("[data-coluna='"+(col)+"']");
             }
-            if($(vizinhosGafanhoto[4]).is(".undefined"))
+            if($(vizinhosGafanhoto[4]).is(".undefined")) {
                 $(vizinhosGafanhoto[4]).addClass("opcao");
+                flagMovimenta = true;
+            }
         }
         if($(vizinhosGafanhoto[5]).is(".player1, .player2")) {
             while($(vizinhosGafanhoto[5]).is(".player1, .player2")) {
@@ -616,8 +696,10 @@ var geraOpcoesAnimais = function (that) {
                 col = $(vizinhosGafanhoto[5]).parent().prevAll().length % 2 == 0 ? col : col + 1;
                 vizinhosGafanhoto[5] = $(vizinhosGafanhoto[5]).parent().next().find("[data-coluna='"+(col)+"']");
             }
-            if($(vizinhosGafanhoto[5]).is(".undefined"))
+            if($(vizinhosGafanhoto[5]).is(".undefined")) {
                 $(vizinhosGafanhoto[5]).addClass("opcao");
+                flagMovimenta = true;
+            }
         }
 
         pecaInsere = $(that);
@@ -629,6 +711,7 @@ var geraOpcoesAnimais = function (that) {
         vizinhosBesouro.forEach(function (item) {
             if($(item).is(".player1, .player2")) {
                 $(item).addClass($(item).is(".player1") ? "opcao-player1-select": "opcao-player2-select");
+                flagMovimenta = true;
             } else {
                 var vizinhosItem = geraVizinhosPecaIndividual(item);
                 
@@ -641,8 +724,10 @@ var geraOpcoesAnimais = function (that) {
                 });
 
                 var verificaLiberdade = verificaLiberdadeDeMovimento(vizinhosItem, that);
-                if($(that).find("img").length > 1 || (pecaDisp && verificaLiberdade))
+                if($(that).find("img").length > 1 || (pecaDisp && verificaLiberdade)) {
                     $(item).addClass("opcao");
+                    flagMovimenta = true;
+                }
             }
         });
         
@@ -679,8 +764,10 @@ var geraOpcoesAnimais = function (that) {
             vizinhosSegundo.forEach(function (item) {
                 var verifica = $(item)[0] == primeiro[0] || $(item)[0] == that || $(item)[0] == segundo[0] ? false 
                     : $(item).is(".undefined");
-                if(verifica)
+                if(verifica) {
                     $(item).addClass("opcao");
+                    flagMovimenta = true;
+                }
             });
         }
 
@@ -690,20 +777,9 @@ var geraOpcoesAnimais = function (that) {
     if(nomeAnimal == "Tatu") {
         var vizinhosTatu = geraVizinhosPecaIndividual(that);
 
-        if($("tr td[class*='player1-pisca'], tr td[class*='player2-pisca']").length > 0) {
+        if($(that).find("img:last").attr("alt") == "Mosquito") {
             vizinhosTatu.forEach(function (item) {
-                if(!$(item).is(".player1, .player2"))
-                    $(item).addClass("opcao");
-            });
-
-            var novoThat = $("tr td[class*='player1-pisca'], tr td[class*='player2-pisca']");
-            pecaInsere = $(novoThat);
-        } else {
-            vizinhosTatu.forEach(function (item) {
-                if($(item).is(".player1, .player2")) {
-                    if(!verificaQuebraColmeia(item[0]) && $(item).find("img").length == 1 && $(item).attr("data-ultima-jogada") == undefined)
-                        $(item).addClass($(item).is(".player1") ? "opcao-player1-select": "opcao-player2-select");
-                } else {
+                if(!$(item).is(".player1, .player2")) {
                     var vizinhosItem = geraVizinhosPecaIndividual(item);
                     
                     vizinhosItem.some(function (itemAux) {
@@ -711,13 +787,58 @@ var geraOpcoesAnimais = function (that) {
                             : $(itemAux).is(".player1, .player2");
                         if(verifica && verificaLiberdadeDeMovimento(vizinhosItem, that)) {
                             $(item).addClass("opcao");
+                            flagMovimenta = true;
                             return true;
                         }
                     });
                 }
+            });  
+        } else if($("tr td[class*='player1-pisca'], tr td[class*='player2-pisca']").length > 0) {
+            vizinhosTatu.forEach(function (item) {
+                if(!$(item).is(".player1, .player2")) {
+                    $(item).addClass("opcao");
+                    flagMovimenta = true;
+                }
             });
+
+            var novoThat = $("tr td[class*='player1-pisca'], tr td[class*='player2-pisca']");
+            pecaInsere = $(novoThat);
+        } else {
+            var vetOpcoesPlayer = [];
+            flagVerificaSePodeJogar = false;
+            vizinhosTatu.forEach(function (item) {
+                if($(item).is(".player1, .player2")) {
+                    if(!verificaQuebraColmeia(item[0]) && $(item).find("img").length == 1 && $(item).attr("data-ultima-jogada") == undefined) {
+                        vetOpcoesPlayer.push(item);
+                        //$(item).addClass($(item).is(".player1") ? "opcao-player1-select": "opcao-player2-select");
+                        flagMovimenta = true;
+                    }
+                } else {
+                    if(!verificaQuebraColmeia(that)) {
+                        var vizinhosItem = geraVizinhosPecaIndividual(item);
+                        
+                        vizinhosItem.some(function (itemAux) {
+                            var verifica = $(itemAux)[0] == that ? false 
+                                : $(itemAux).is(".player1, .player2");
+                            if(verifica && verificaLiberdadeDeMovimento(vizinhosItem, that)) {
+                                $(item).addClass("opcao");
+                                flagMovimenta = true;
+                                return true;
+                            }
+                        });
+                    }
+                }
+            });
+            flagVerificaSePodeJogar = true;
+
+            if(vetOpcoesPlayer == 0 && verificaQuebraColmeia(that)) {
+                $(that).removeClass("player1-select player2-select");
+            } else {
+                vetOpcoesPlayer.forEach((item) => $(item).addClass($(item).is(".player1") ? "opcao-player1-select": "opcao-player2-select"));
+                flagMovimenta = true;
+                pecaInsere = $(that);
+            }
             
-            pecaInsere = $(that);
         }
     }
 
@@ -733,14 +854,43 @@ var geraOpcoesAnimais = function (that) {
             var thatEnvia = $(that).attr("data-copia-mosquito", animalEnvia);
             geraOpcoesAnimais(thatEnvia[0]);
         } else {
+            var opcoesUndefinedMosquito = []
             vizinhosMosquito.forEach(function (item) {
                 if($(item).is(".player1, .player2") && $(item).find("img:last").attr("alt") != "Mosquito")
                     opcoesMosquito.push(item);
+                if($(item).is(".undefined"))
+                    opcoesUndefinedMosquito.push(item);
             });
 
-            if(opcoesMosquito.length > 0) {
-                opcoesMosquito.forEach(function (item) {
+            var verificaUndefineds = 0;
+            opcoesUndefinedMosquito.forEach(function (item) {
+                var vizinhosUndefinedMosquito = geraVizinhosPecaIndividual(item);
+                if(!verificaLiberdadeDeMovimento(vizinhosUndefinedMosquito, that))
+                    verificaUndefineds++;
+            });
+
+            var novoOpcoesMosquito = [];
+            var vetPosicoesApaga = [];
+            if(verificaUndefineds == opcoesUndefinedMosquito.length) {
+                opcoesMosquito.forEach(function (item, i) {
+                    var nomeAnimalItem = $(item).find("img").attr("alt");
+                    if( nomeAnimalItem == "Abelha" || nomeAnimalItem == "Aranha" || 
+                        nomeAnimalItem == "Formiga" ||  nomeAnimalItem == "Tatu")
+                        vetPosicoesApaga.push(i);
+                });
+                if(vetPosicoesApaga.length > 0)
+                    novoOpcoesMosquito = opcoesMosquito.filter(function (item, i) {
+                        if(vetPosicoesApaga.indexOf(i) == -1)
+                            return item;
+                    });
+            } else {
+                opcoesMosquito.forEach((item) => novoOpcoesMosquito.push(item));
+            }
+
+            if(novoOpcoesMosquito.length > 0) {
+                novoOpcoesMosquito.forEach(function (item) {
                     $(item).addClass($(item).is(".player1") ? "opcao-player1-select": "opcao-player2-select");
+                    flagMovimenta = true;
                 });
                 pecaInsere = $(that);
             } else {
@@ -750,7 +900,7 @@ var geraOpcoesAnimais = function (that) {
     }
 };
 
-// gera um modal se a peça clicada tem uma pilha de insetos - ok
+// gera um modal se a peça clicada tem uma pilha de insetos
 var geraModalPilhaInsetos = function (that) {
     $("#modalPilha").empty().show();
     qtdInsetos = parseInt($(that).find("img").length);
@@ -765,7 +915,51 @@ var geraModalPilhaInsetos = function (that) {
 }
 $("#modalPilha").hide();
 
-// Insere uma peça no tabuleiro - ok
+var verificaVitoria = function () {
+    var abelha1 = $("tr td[class='player1'] img[alt='Abelha']").parent()[0];
+    var vizinhosAbelha1 = geraVizinhosPecaIndividual(abelha1);
+    var contadorAbelha1 = 0;
+    vizinhosAbelha1.forEach(function (item) {
+        if($(item).is(".player1, .player2")) 
+            contadorAbelha1++;
+    });
+
+    var abelha2 = $("tr td[class='player2'] img[alt='Abelha']").parent()[0];
+    var vizinhosAbelha2 = geraVizinhosPecaIndividual(abelha2);
+    var contadorAbelha2 = 0;
+    vizinhosAbelha2.forEach(function (item) {
+        if($(item).is(".player1, .player2")) 
+            contadorAbelha2++;
+    });
+
+    if(contadorAbelha1 == 6 && contadorAbelha2 == 6) {
+        setTimeout(function () {
+            $("#form").show();
+            $("#paragrafojogador").text("Empate, ambos os jogadores ganharam! Parabéns!");
+        }, 500);
+    } else if(contadorAbelha1 == 6) {
+        setTimeout(function () {
+            $("#form").show();
+            $("#paragrafojogador").text("O " + $("#jogador2").val() + " ganhou! Parabéns!");
+        }, 500);
+    } else if(contadorAbelha2 == 6) {
+        setTimeout(function () {
+            $("#form").show();
+            $("#paragrafojogador").text("O " + $("#jogador1").val() + " ganhou! Parabéns!");
+        }, 500);
+    }
+/*
+    if(contadorAbelha1 == 6 || contadorAbelha2 == 6) {
+        pecasPlayer1[0].nPecas = pecasPlayer2[0].nPecas = 1;
+        pecasPlayer1[1].nPecas = pecasPlayer2[1].nPecas = 3;
+        pecasPlayer1[2].nPecas = pecasPlayer2[2].nPecas = 3;
+        pecasPlayer1[3].nPecas = pecasPlayer2[3].nPecas = 2;
+        pecasPlayer1[4].nPecas = pecasPlayer2[4].nPecas = 2;
+        $("tbody tr").remove();
+    }*/
+};
+
+// Insere uma peça no tabuleiro
 var insPecTabu = function (that) {
     var textClassAliado = flagPlayer1 ? "player1" : "player2";
     var pecas = flagPlayer1 ? pecasPlayer1 : pecasPlayer2;
@@ -786,7 +980,8 @@ var insPecTabu = function (that) {
     // Se tem pecaInsere marcada e cliquei em opcao
     if(pecaInsere != null && $(that).hasClass("opcao")) {
         $("tr td[data-ultima-jogada]").removeAttr("data-ultima-jogada")
-        $(that).append($(pecaInsere).html()).attr("class", textClassAliado).attr("data-ultima-jogada", "");
+        var corPecaInsere = $(pecaInsere).is(".player1") ? "player1" : "player2";
+        $(that).append($(pecaInsere).html()).attr("class", corPecaInsere).attr("data-ultima-jogada", "");
         if($(pecaInsere).prop("nodeName") == "LI") { //Se estou inserindo peça nova no tabuleiro
             for(var i=0; i<pecas.length; i++) 
                 if(pecas[i].nome == $(pecaInsere).find("img").attr("alt"))
@@ -809,9 +1004,10 @@ var insPecTabu = function (that) {
         }
         $("#modalPilha").empty().hide();
         $("li").remove();
-        flagPlayer1 = !flagPlayer1;
         $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-pisca player2-pisca");
         atualizaTabuleiro(that);
+        verificaVitoria();
+        flagPlayer1 = !flagPlayer1;
         getPecasDisponiveis();
     // Se tem pecaInsere marcada e cliquei em opcao para besouro
     } else if(pecaInsere != null && $(that).is(".opcao-player1-select, .opcao-player2-select")) {
@@ -851,9 +1047,10 @@ var insPecTabu = function (that) {
             }
             $("#modalPilha").empty().hide();
             $("li").remove();
-            flagPlayer1 = !flagPlayer1;
             $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-pisca player2-pisca");
             atualizaTabuleiro(that);
+            verificaVitoria();
+            flagPlayer1 = !flagPlayer1;
             getPecasDisponiveis();
         }
     // Se cliquei em alguma peça de aliado (para ver os movimentos)
@@ -864,7 +1061,11 @@ var insPecTabu = function (that) {
             $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-select player2-select "+
                 "player1-pisca player2-pisca");
             pecaInsere = null;
-            if(!verificaQuebraColmeia(that) && pecas[0].nPecas == 0) {// true = quebra colmeia, false = não quebra
+            
+            if(pecas[0].nPecas != 0)
+                criaCampoMensagem("Coloque a sua abelha para poder mover esse inseto!", flagPlayer1 ? 1 : 2, 2000);
+            // true = quebra colmeia, false = não quebra
+            if($(that).find("img").attr("alt") == "Tatu" || (!verificaQuebraColmeia(that) && pecas[0].nPecas == 0)) {
                 $(that).addClass(textClassePeca + "-select");
                 geraOpcoesAnimais(that);
             }
@@ -881,12 +1082,10 @@ var insPecTabu = function (that) {
             geraModalPilhaInsetos(that);
     }
 
-    
-
     atualizaPilhaPeca(that);
 }
 
-// Header esconder e aparecer - ok
+// Header esconder e aparecer
 $("header").click(function () {
     $(this).slideUp();
     $(this).parent().prepend("<div class='mostra-header'>"
@@ -897,7 +1096,7 @@ $("header").click(function () {
     })
 });
 
-// Movimentação do tabuleiro (left, top, right, bottom, fixed) - ok
+// Movimentação do tabuleiro (left, top, right, bottom, fixed)
 var iniciaInterval;
 var movimentacaoTabuleiro = function () {
     $("#btnTop")
@@ -941,3 +1140,38 @@ var movimentacaoTabuleiro = function () {
     });
 };
 movimentacaoTabuleiro();
+
+
+var startJogo = function () {
+    // 5 mosquito 6 joaninha 7 tatu
+    pecasPlayer1[5].nPecas = pecasPlayer2[5].nPecas = parseInt($("input[name='mosquito']:checked").val());
+    pecasPlayer1[6].nPecas = pecasPlayer2[6].nPecas = parseInt($("input[name='joaninha']:checked").val());
+    pecasPlayer1[7].nPecas = pecasPlayer2[7].nPecas = parseInt($("input[name='tatu']:checked").val());
+    
+    getPecasDisponiveis();
+    $("#direita").addClass("vez-player1");
+    $("#esquerda").removeClass("vez-player2");
+}
+
+$("#jogador1").click(function () {
+    $("#jogador1").siblings(".formLabel").addClass("formLabelApos");
+}).blur(function () {
+    if($(this).val() == "") {
+        $("#jogador1").siblings(".formLabel").removeClass("formLabelApos");
+        $("#paragrafojogador").text("Jogador 1 é o primeiro a jogar!");
+    } else {
+        $("#paragrafojogador").text($(this).val() + " é o primeiro a jogar!");
+    }
+});
+$("#jogador2").click(function () {
+    $("#jogador2").siblings(".formLabel").addClass("formLabelApos");
+}).blur(function () {
+    if($(this).val() == "")
+        $("#jogador2").siblings(".formLabel").removeClass("formLabelApos");
+});
+$(".blocoBotao").click(function () {
+    if($("#jogador1").val() != "" && $("#jogador2").val() != "") {
+        startJogo();
+        $("#form").hide();
+    }
+});

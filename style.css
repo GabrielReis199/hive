@@ -42,16 +42,20 @@ html, body {
     height: 100%;
 }
 
-header {
-    box-shadow: 0 2px 12px rgb(202, 202, 202);
+#infoJogo {
     position: absolute;
-    background-color:#f0eeee;
     top: 0;
     left: 0;
     right: 0;
     margin: auto;
-    z-index: 900;
+    z-index: 100;
     width: 500px;
+    box-shadow: 0 2px 12px rgb(202, 202, 202);
+    border-radius: 0 0 10px 10px;
+}
+
+header {
+    background-color:#f0eeee;
     padding: 10px 0;
     display: flex;
     justify-content: space-between;
@@ -68,7 +72,7 @@ header {
     left: 0;
     right: 0;
     margin: auto;
-    z-index: 900;
+    z-index: 100;
     opacity: 0;
     display: flex;
     align-items: center;
@@ -118,6 +122,38 @@ header {
     margin-left: 5px;
 }
 
+.campoMensagem {
+    background-color:#f0eeee;
+    height: 40px;
+    border-radius: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.campoMensagem p {
+    margin-top: 5px;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.barraMensagem {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 7px;
+    background-color: #999898;
+}
+@keyframes barra-msg {
+    0%{
+        width: 100%;
+    }
+    100% {
+        width: 0%;
+    }
+}
+
 main {
     position: relative;
     width: 100%;
@@ -139,19 +175,6 @@ tr {
     position: relative;
 }
 
-.draggable {
-    position: relative;
-    top: 0px;
-    left: 0px;
-    /*transition: transform 0.3s linear z-index 0.3 linear;*/
-    z-index: 0;
-}
-
-.dragging {
-    /*transform: scale(1.1);*/
-    z-index: 10;
-}
-
 tr:nth-child(2n) {
     position: relative;
     right: -37px;
@@ -162,7 +185,6 @@ td {
     width: 70px;
     height: 70px;
     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    background-color: #f0eeee;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -199,7 +221,8 @@ td img {
 }
 
 .undefined {
-    background-color: #cdcdcd;
+    background-color: #FFFFFF;
+    /*background-color: #cdcdcd;*/
 }
 
 .opcao {
@@ -243,26 +266,6 @@ td img {
     }
 }
 
-/*
-.qtd-pecas {
-    position: relative;
-}
-*/
-/*
-.qtd-pecas::after {
-    content: "2";
-    text-align: center;
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    bottom: 10px;
-    right: 15px;
-    color: white;
-    border: 1px solid #000;
-    border-radius: 50%;
-    background-color: rgb(168, 33, 33);
-}
-*/
 #esquerda,
 #direita {
     box-shadow: 0 -2px 12px rgb(202, 202, 202);
@@ -297,11 +300,27 @@ td img {
 }
 
 #direita.vez-player1 {
-    box-shadow: 0 0 20px #c78100;
+    animation: efeito-vez-player1 1s infinite alternate;
+}
+@keyframes efeito-vez-player1 {
+    0%{
+        box-shadow: 0 0 50px #c78100;
+    }
+    100% {
+        box-shadow: 0 0 20px #f5b132;
+    }
 }
 
 #esquerda.vez-player2 {
-    box-shadow: 0 0 20px #992fb9;
+    animation: efeito-vez-player2 1s infinite alternate;
+}
+@keyframes efeito-vez-player2 {
+    0%{
+        box-shadow: 0 0 50px #611c75;
+    }
+    100% {
+        box-shadow: 0 0 20px #915ea0;
+    }
 }
 
 ul {
@@ -339,7 +358,7 @@ li img {
     left: 0;
     right: 0;
     margin: auto;
-    z-index: 900;
+    z-index: 15;
     width: 150px;
     height: 30px;
     padding: 10px 0;
@@ -371,7 +390,7 @@ li img {
     background-color:#f0eeee;
     bottom: 30px;
     right: 30px;
-    z-index: 100;
+    z-index: 10;
     height: 70px;
     column-gap: 3px;
     padding: 0 5px;
@@ -406,12 +425,203 @@ li img {
     border-radius: 50%;
     display: flex;
     justify-content: center;
-    border: 1px solid #000;
+    border: 1px solid #2e2e2e;
     align-items: center;
     content: " " counter(item);
     height: 11px;
     width: 11px;
     background-color: rgb(168, 33, 33);
-    color: #000;
+    color: #2e2e2e;
     font-size: 10px;
+}
+
+#bloqueiaIteracao {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    background-color: transparent;
+    width: 100%;
+    height: 100%;
+}
+
+#form {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 150;
+    width: 100%;
+    height: 100%;
+}
+
+#form > form {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 15px;
+    background-color: #f0eeee;
+    border-radius: 10px;
+    animation: piscaFormulario 1s infinite alternate;
+}
+@keyframes piscaFormulario {
+    0% {
+        box-shadow: 0 0 12px rgb(202, 202, 202);
+    }
+    100% {
+        box-shadow: 0 0 30px rgb(114, 114, 114);
+    }
+}
+
+form > p {
+    font-size: 1.4rem;
+    margin: 10px 0;
+}
+
+.blocoInput {
+    height: 40px;
+    width: 350px;
+    display: flex;
+    align-items: center;
+    column-gap: 15px;
+}
+
+.inputLabel {
+    height: 30px;
+    flex: 1;
+    position: relative;
+}
+
+.inputLabel .inputText {
+    box-shadow: 0 0 0 0;
+    border: 0 none;
+    width: 100%;
+    height: 100%;
+    outline: 0;
+    background-color: inherit;
+    border-bottom: 1px solid #bebebe;
+}
+
+.formLabel {
+    position: absolute;
+    font-size: 1.4rem;
+    color: #2e2e2e;
+    top: 8px;
+    left: 0;
+    transition: 300ms;
+}
+
+.formLabelApos {
+    transition: 500ms;
+    font-size: 1rem;
+    top: -8px;
+}
+
+.insetoForm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 40px;
+    height: 40px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.insetoForm img {
+    width: 22px;
+}
+
+.insetoPlayer1 {
+    background-color: #f5b132;
+}
+
+.insetoPlayer2 {
+    background-color: #915ea0;
+}
+
+.insetoPlayer12 {
+    background: linear-gradient(-45deg, #f5b132 50%, #915ea0 50%);
+}
+
+#blocoExpansoes {
+    display: flex;
+    justify-content: space-around;
+    width: 350px;
+    column-gap: 15px;
+    margin-top: 15px;
+}
+
+.blocoRadio {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+    position: relative;
+}
+
+.radio {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+}
+
+.radio input {
+    appearance: none;
+    cursor: pointer;
+}
+
+.radio input::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border: 1px solid #2e2e2e;
+    border-radius: 5px;
+    vertical-align: middle;
+}
+
+.radio input:checked::before {
+    background-color: #2e2e2e;
+}
+
+.radioLabel p {
+    font-size: 1.3rem;
+}
+
+.radioLabel .formLabel {
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    font-size: 1.4rem;
+    color: #2e2e2e;
+    text-align: center;
+}
+
+.blocoBotao {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+.blocoBotao button {
+    appearance: none;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 10px;
+    animation: togglePlayer12 3s infinite alternate;
+    cursor: pointer;
+}
+@keyframes togglePlayer12 {
+    0% {
+        background-color: #f5b132;
+    }
+    100% {
+        background-color: #915ea0;
+    }
 }
