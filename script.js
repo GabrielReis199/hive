@@ -322,7 +322,7 @@ $("#esquerda").removeClass("vez-player2");
 var atualizaTabuleiro = function (that) {
     $("main").css('pointer-events', 'none');
     if($("tbody tr").length == 0) {
-        $("main").one("click", function () {
+        $("main").on("click", function () {
             geraTabuleiro(true, true, true, true);
             var pecas = flagPlayer1 ? pecasPlayer1 : pecasPlayer2;
             for(var i=0; i<pecas.length; i++) 
@@ -332,6 +332,7 @@ var atualizaTabuleiro = function (that) {
             $("table").css({"top": "0px", "left": "-19.5px"});
             flagPlayer1 = !flagPlayer1;
             getPecasDisponiveis();
+            $("main").off("click");
         })
     } else {
         if($(that).next().length == 0)
@@ -829,8 +830,7 @@ var geraOpcoesAnimais = function (that) {
                     }
                 }
             });
-            flagVerificaSePodeJogar = true;
-
+            
             if(vetOpcoesPlayer == 0 && verificaQuebraColmeia(that)) {
                 $(that).removeClass("player1-select player2-select");
             } else {
@@ -838,7 +838,7 @@ var geraOpcoesAnimais = function (that) {
                 flagMovimenta = true;
                 pecaInsere = $(that);
             }
-            
+            flagVerificaSePodeJogar = true;
         }
     }
 
@@ -915,6 +915,35 @@ var geraModalPilhaInsetos = function (that) {
 }
 $("#modalPilha").hide();
 
+var resetaJogo = function () {
+    pecasPlayer1[0].nPecas = pecasPlayer2[0].nPecas = 1;
+    pecasPlayer1[1].nPecas = pecasPlayer2[1].nPecas = 3;
+    pecasPlayer1[2].nPecas = pecasPlayer2[2].nPecas = 3;
+    pecasPlayer1[3].nPecas = pecasPlayer2[3].nPecas = 2;
+    pecasPlayer1[4].nPecas = pecasPlayer2[4].nPecas = 2;
+    $("tbody tr").remove();
+    $("#direita").show().removeClass("vez-player1");
+    $("#esquerda").show().removeClass("vez-player2");
+    flagPlayer1 = true;
+    contadorRodadas = 0;
+    pecaInsere = null;
+    $("main").css('pointer-events', 'none');
+    $("main").on("click", function () {
+        if(pecaInsere != null && $("ul li[class*='player1-select'], ul li[class*='player2-select']").length > 0) {
+            geraTabuleiro(true, true, true, true);
+            var pecas = flagPlayer1 ? pecasPlayer1 : pecasPlayer2;
+            for(var i=0; i<pecas.length; i++) 
+                if(pecas[i].nome == $(pecaInsere).find("img").attr("alt"))
+                    pecas[i].nPecas = pecas[i].nPecas - 1;
+            $("li").remove();
+            $("table").css({"top": "0px", "left": "-19.5px"});
+            flagPlayer1 = !flagPlayer1;
+            getPecasDisponiveis();
+            $("main").off("click");
+        }
+    })
+}
+
 var verificaVitoria = function () {
     var abelha1 = $("tr td[class='player1'] img[alt='Abelha']").parent()[0];
     var vizinhosAbelha1 = geraVizinhosPecaIndividual(abelha1);
@@ -948,15 +977,13 @@ var verificaVitoria = function () {
             $("#paragrafojogador").text("O " + $("#jogador1").val() + " ganhou! Parabéns!");
         }, 500);
     }
-/*
+
     if(contadorAbelha1 == 6 || contadorAbelha2 == 6) {
-        pecasPlayer1[0].nPecas = pecasPlayer2[0].nPecas = 1;
-        pecasPlayer1[1].nPecas = pecasPlayer2[1].nPecas = 3;
-        pecasPlayer1[2].nPecas = pecasPlayer2[2].nPecas = 3;
-        pecasPlayer1[3].nPecas = pecasPlayer2[3].nPecas = 2;
-        pecasPlayer1[4].nPecas = pecasPlayer2[4].nPecas = 2;
-        $("tbody tr").remove();
-    }*/
+        resetaJogo();
+        return true;
+    }
+
+    return false;
 };
 
 // Insere uma peça no tabuleiro
@@ -1005,10 +1032,11 @@ var insPecTabu = function (that) {
         $("#modalPilha").empty().hide();
         $("li").remove();
         $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-pisca player2-pisca");
-        atualizaTabuleiro(that);
-        verificaVitoria();
-        flagPlayer1 = !flagPlayer1;
-        getPecasDisponiveis();
+        if(!verificaVitoria()) {
+            atualizaTabuleiro(that);
+            flagPlayer1 = !flagPlayer1;
+            getPecasDisponiveis();
+        }
     // Se tem pecaInsere marcada e cliquei em opcao para besouro
     } else if(pecaInsere != null && $(that).is(".opcao-player1-select, .opcao-player2-select")) {
         if($(pecaInsere).find("img").attr("alt") == "Tatu") {
@@ -1048,10 +1076,11 @@ var insPecTabu = function (that) {
             $("#modalPilha").empty().hide();
             $("li").remove();
             $("td").removeClass("opcao opcao-player1-select opcao-player2-select player1-pisca player2-pisca");
-            atualizaTabuleiro(that);
-            verificaVitoria();
-            flagPlayer1 = !flagPlayer1;
-            getPecasDisponiveis();
+            if(!verificaVitoria()) {
+                atualizaTabuleiro(that);
+                flagPlayer1 = !flagPlayer1;
+                getPecasDisponiveis();
+            }
         }
     // Se cliquei em alguma peça de aliado (para ver os movimentos)
     } else if($(that).hasClass(textClassAliado)){
@@ -1065,6 +1094,8 @@ var insPecTabu = function (that) {
             if(pecas[0].nPecas != 0)
                 criaCampoMensagem("Coloque a sua abelha para poder mover esse inseto!", flagPlayer1 ? 1 : 2, 2000);
             // true = quebra colmeia, false = não quebra
+            if($(that).find("img").attr("alt") == "Tatu")
+                verificaQuebraColmeia(that)
             if($(that).find("img").attr("alt") == "Tatu" || (!verificaQuebraColmeia(that) && pecas[0].nPecas == 0)) {
                 $(that).addClass(textClassePeca + "-select");
                 geraOpcoesAnimais(that);
@@ -1148,12 +1179,13 @@ var startJogo = function () {
     pecasPlayer1[6].nPecas = pecasPlayer2[6].nPecas = parseInt($("input[name='joaninha']:checked").val());
     pecasPlayer1[7].nPecas = pecasPlayer2[7].nPecas = parseInt($("input[name='tatu']:checked").val());
     
+    $("li").remove();
     getPecasDisponiveis();
     $("#direita").addClass("vez-player1");
     $("#esquerda").removeClass("vez-player2");
 }
 
-$("#jogador1").click(function () {
+$("#jogador1").focus(function () {
     $("#jogador1").siblings(".formLabel").addClass("formLabelApos");
 }).blur(function () {
     if($(this).val() == "") {
@@ -1163,15 +1195,31 @@ $("#jogador1").click(function () {
         $("#paragrafojogador").text($(this).val() + " é o primeiro a jogar!");
     }
 });
-$("#jogador2").click(function () {
+$("#jogador2").focus(function () {
     $("#jogador2").siblings(".formLabel").addClass("formLabelApos");
 }).blur(function () {
     if($(this).val() == "")
         $("#jogador2").siblings(".formLabel").removeClass("formLabelApos");
 });
 $(".blocoBotao").click(function () {
-    if($("#jogador1").val() != "" && $("#jogador2").val() != "") {
+    if($("#jogador1").val() != "" && $("#jogador2").val() != "" && $("#jogador1").val() != $("#jogador2").val()) {
         startJogo();
         $("#form").hide();
+    } else {
+        $("#paragrafojogador").text("Preencha os nomes adequadamente!");
     }
 });
+$("#resetJogo").click(function () {
+    $("#modelResetaJogo").show();
+    $("#cancelaModalJogo").click(function () {
+        $("#modelResetaJogo").hide();
+        $("header").slideDown();
+    });
+    $("#reiniciaJogo").click(function () {
+        resetaJogo();
+        startJogo();
+        $("#modelResetaJogo").hide();
+        $("header").slideDown();
+    });
+});
+$("#modelResetaJogo").hide();

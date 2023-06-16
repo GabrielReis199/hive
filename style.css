@@ -625,3 +625,72 @@ form > p {
         background-color: #915ea0;
     }
 }
+
+#resetJogo {
+    cursor: pointer;
+}
+#resetJogo:hover{
+    animation: rotacao 800ms infinite;
+}
+@keyframes rotacao {
+    25% {
+        transform: rotate(-90deg);
+    }
+    50% {
+        transform: rotate(-180deg);
+    }
+    75% {
+        transform: rotate(-270deg);
+    }
+    100% {
+        transform: rotate(-360deg);
+    }
+}
+
+#modelResetaJogo {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+}
+
+#modelResetaJogo div > p {
+    margin-top: 15px;
+    font-size: 1.4rem;
+}
+
+#modelResetaJogo > div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 15px;
+    background-color: #f0eeee;
+    border-radius: 10px;
+    animation: piscaFormulario 1s infinite alternate;
+}
+
+#botoesReiniciar {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+#botoesReiniciar button {
+    appearance: none;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 10px;
+    background-color: #b6b5b5;
+    cursor: pointer;
+}
+
+#botoesReiniciar button + button {
+    margin-left: 5px;
+    animation: togglePlayer12 3s infinite alternate;
+}
