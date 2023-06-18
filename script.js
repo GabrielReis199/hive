@@ -429,12 +429,6 @@ var verificaQuebraColmeia = function (that) {
         }
     }
 
-    /*console.log("___________________ A")
-    pecasColmeia.forEach((i) => console.log($("tr[data-linha='"+i.linha+"'] td[data-coluna='"+i.coluna+"']")[0]));
-    console.log(that, "that");
-    console.log($("tr td[class*='player1'], tr td[class*='player2']").not(that));
-    console.log("___________________ Z")*/
-
     var verifica = false;
     $("tr td[class*='player1'], tr td[class*='player2']").not(that).each(function () {
         var objAux = {linha: parseInt($(this).parent().attr("data-linha")), coluna: parseInt($(this).attr("data-coluna"))};
@@ -1096,7 +1090,8 @@ var insPecTabu = function (that) {
             // true = quebra colmeia, false = não quebra
             if($(that).find("img").attr("alt") == "Tatu")
                 verificaQuebraColmeia(that)
-            if($(that).find("img").attr("alt") == "Tatu" || (!verificaQuebraColmeia(that) && pecas[0].nPecas == 0)) {
+            if(($(that).find("img").attr("alt") == "Tatu" && pecas[0].nPecas == 0) || 
+                (!verificaQuebraColmeia(that) && pecas[0].nPecas == 0)) {
                 $(that).addClass(textClassePeca + "-select");
                 geraOpcoesAnimais(that);
             }
